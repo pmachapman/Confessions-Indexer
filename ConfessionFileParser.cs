@@ -126,7 +126,7 @@ namespace Conglomo.Confessions.Indexer
                 {
                     string id = childNode.Attributes["id"].Value;
                     string currentFileName = $"{fileName}#{id}";
-                    if (childNode.Name == "h4")
+                    if (childNode.Name == "h3" || childNode.Name == "h4" || childNode.Name == "h5")
                     {
                         // Confession Article
                         currentTitle = $"{title}: {childNode.InnerText}";
@@ -157,17 +157,40 @@ namespace Conglomo.Confessions.Indexer
                 }
                 else if (childNode.Name == "p")
                 {
+                    // See if we are adding to an existing entry
                     if (!string.IsNullOrWhiteSpace(currentEntry.Contents))
                     {
                         currentEntry.Contents += " ";
                     }
 
+                    // Remove italicised words
+                    childNode.InnerHtml = childNode.InnerHtml
+                        .Replace("<em>", string.Empty, StringComparison.OrdinalIgnoreCase)
+                        .Replace("</em>", string.Empty, StringComparison.OrdinalIgnoreCase)
+                        .Replace("<strong>", string.Empty, StringComparison.OrdinalIgnoreCase)
+                        .Replace("</strong>", string.Empty, StringComparison.OrdinalIgnoreCase);
+
+                    // Get the contents as text, outside of the tags
                     string contents = Regex.Replace(HttpUtility.HtmlDecode(childNode.GetDirectInnerText()), @"\s+", " ").Trim();
+
+                    // Replace synonyms
                     foreach (Synonym synonym in Synonyms.All)
                     {
                         contents = contents.Replace(synonym.AlternateWord, synonym.PreferredWord);
                     }
 
+                    // Fix any weirdness
+                    contents = contents
+                        .Replace(" - .", string.Empty, StringComparison.OrdinalIgnoreCase)
+                        .Replace(" ().", ".", StringComparison.OrdinalIgnoreCase)
+                        .Replace(" ()", string.Empty, StringComparison.OrdinalIgnoreCase)
+                        .Replace("(; ).", ".", StringComparison.OrdinalIgnoreCase)
+                        .Replace(" , ", ", ", StringComparison.OrdinalIgnoreCase)
+                        .Replace("?.", ".", StringComparison.OrdinalIgnoreCase)
+                        .Replace("..", ".", StringComparison.OrdinalIgnoreCase)
+                        .Replace(",.", ".", StringComparison.OrdinalIgnoreCase);
+
+                    // Store the contents
                     currentEntry.Contents += contents;
                 }
             }

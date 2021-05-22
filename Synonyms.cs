@@ -24,6 +24,8 @@ namespace Conglomo.Confessions.Indexer
         {
             new Synonym { AlternateWord = "catholick", PreferredWord = "catholic" },
             new Synonym { AlternateWord = "Catholick", PreferredWord = "Catholic" },
+            new Synonym { AlternateWord = "Φρόνημα", PreferredWord = "phronema" },
+            new Synonym { AlternateWord = "σαρκὸς", PreferredWord = "sarkos" },
         }.AsReadOnly();
     }
 }

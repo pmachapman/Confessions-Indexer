@@ -11,6 +11,7 @@ namespace Conglomo.Confessions.Indexer
     using System.Collections.ObjectModel;
     using System.IO;
     using System.Linq;
+    using System.Text;
     using System.Text.RegularExpressions;
     using System.Web;
     using HtmlAgilityPack;
@@ -59,6 +60,37 @@ namespace Conglomo.Confessions.Indexer
         public ReadOnlyCollection<SearchIndex> SearchIndex
         {
             get => this.searchIndexEntries.AsReadOnly();
+        }
+
+        /// <summary>
+        /// Processes the contents.
+        /// </summary>
+        /// <param name="contents">The contents.</param>
+        /// <returns>The processed contents.</returns>
+        private static string ProcessContents(string contents)
+        {
+            // Get the contents as text, outside of the tags
+            contents = Regex.Replace(HttpUtility.HtmlDecode(contents), @"\s+", " ").Trim();
+
+            // Replace synonyms
+            foreach (Synonym synonym in Synonyms.All)
+            {
+                contents = contents.Replace(synonym.AlternateWord, synonym.PreferredWord);
+            }
+
+            // Fix any weirdness
+            contents = contents
+                .Replace(" - .", string.Empty, StringComparison.OrdinalIgnoreCase)
+                .Replace(" ().", ".", StringComparison.OrdinalIgnoreCase)
+                .Replace(" ()", string.Empty, StringComparison.OrdinalIgnoreCase)
+                .Replace("(; ).", ".", StringComparison.OrdinalIgnoreCase)
+                .Replace(" , ", ", ", StringComparison.OrdinalIgnoreCase)
+                .Replace("?.", ".", StringComparison.OrdinalIgnoreCase)
+                .Replace("..", ".", StringComparison.OrdinalIgnoreCase)
+                .Replace(",.", ".", StringComparison.OrdinalIgnoreCase);
+
+            // Return the contents
+            return contents;
         }
 
         /// <summary>
@@ -139,6 +171,8 @@ namespace Conglomo.Confessions.Indexer
                         {
                             currentTitle = $"{title}: Q&A {questionNumber}";
                         }
+
+                        // TODO: Get the catechism answer
                     }
 
                     if (currentEntry.FileName != currentFileName)
@@ -163,35 +197,15 @@ namespace Conglomo.Confessions.Indexer
                         currentEntry.Contents += " ";
                     }
 
-                    // Remove italicised words
+                    // Remove bold and italic tags
                     childNode.InnerHtml = childNode.InnerHtml
                         .Replace("<em>", string.Empty, StringComparison.OrdinalIgnoreCase)
                         .Replace("</em>", string.Empty, StringComparison.OrdinalIgnoreCase)
                         .Replace("<strong>", string.Empty, StringComparison.OrdinalIgnoreCase)
                         .Replace("</strong>", string.Empty, StringComparison.OrdinalIgnoreCase);
 
-                    // Get the contents as text, outside of the tags
-                    string contents = Regex.Replace(HttpUtility.HtmlDecode(childNode.GetDirectInnerText()), @"\s+", " ").Trim();
-
-                    // Replace synonyms
-                    foreach (Synonym synonym in Synonyms.All)
-                    {
-                        contents = contents.Replace(synonym.AlternateWord, synonym.PreferredWord);
-                    }
-
-                    // Fix any weirdness
-                    contents = contents
-                        .Replace(" - .", string.Empty, StringComparison.OrdinalIgnoreCase)
-                        .Replace(" ().", ".", StringComparison.OrdinalIgnoreCase)
-                        .Replace(" ()", string.Empty, StringComparison.OrdinalIgnoreCase)
-                        .Replace("(; ).", ".", StringComparison.OrdinalIgnoreCase)
-                        .Replace(" , ", ", ", StringComparison.OrdinalIgnoreCase)
-                        .Replace("?.", ".", StringComparison.OrdinalIgnoreCase)
-                        .Replace("..", ".", StringComparison.OrdinalIgnoreCase)
-                        .Replace(",.", ".", StringComparison.OrdinalIgnoreCase);
-
-                    // Store the contents
-                    currentEntry.Contents += contents;
+                    // Get the contents
+                    currentEntry.Contents += ProcessContents(childNode.GetDirectInnerText());
                 }
             }
 

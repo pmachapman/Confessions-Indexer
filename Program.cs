@@ -47,8 +47,19 @@ namespace Conglomo.Confessions.Indexer
                 }
             }
 
+            // Get the filenames
+            string[] fileNames;
+            if (path.EndsWith(".html", StringComparison.OrdinalIgnoreCase))
+            {
+                fileNames = new string[] { path };
+            }
+            else
+            {
+                fileNames = Directory.GetFiles(path, "*.html");
+            }
+
             // Get all HTML files in the directory
-            foreach (string fileName in Directory.GetFiles(path, "*.html"))
+            foreach (string fileName in fileNames)
             {
                 if (!fileName.EndsWith(FileNamesToIgnore, StringComparison.OrdinalIgnoreCase))
                 {

@@ -11,6 +11,9 @@
       "companyName": "Conglomo",
       "copyrightText": "Copyright 2021 Conglomo Limited. All rights reserved.",
       "documentationCulture": "en-GB"
+    },
+    "layoutRules": {
+      "newlineAtEndOfFile": "require"
     }
   }
 }

@@ -37,5 +37,29 @@ namespace Conglomo.Confessions.Indexer
             // Default to false
             return false;
         }
+
+        /// <summary>
+        /// Removes the formatting tags from a string.
+        /// </summary>
+        /// <param name="instance">The string instance.</param>
+        /// <returns>
+        /// The string instance with formatting tags removed.
+        /// </returns>
+        public static string RemoveFormattingTags(this string instance) => instance
+            .Replace("<em>", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("</em>", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("<strong>", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("</strong>", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("<table>", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("</table>", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("<thead>", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("</thead>", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("<tbody>", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("</tbody>", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("<tr>", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("</tr>", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("<td>", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("</td>", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("<td colspan=\"3\">", string.Empty, StringComparison.OrdinalIgnoreCase);
     }
 }

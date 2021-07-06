@@ -143,7 +143,14 @@ namespace Conglomo.Confessions.Indexer
 
             // Get the child nodes, and add any OL nodes (for catechisms)
             List<HtmlNode> childNodes = articleNode.ChildNodes.ToList();
-            childNodes.AddRange(articleNode.ChildNodes.Where(n => n.Name == "ol").SelectMany(n => n.ChildNodes));
+            for (int i = 0; i < childNodes.Count; i++)
+            {
+                // Add li nodes right after the ol to keep order
+                if (childNodes[i].Name == "ol")
+                {
+                    childNodes.InsertRange(i + 1, childNodes[i].ChildNodes);
+                }
+            }
 
             // Iterate over the contents
             string currentTitle = title;
@@ -172,7 +179,18 @@ namespace Conglomo.Confessions.Indexer
                             currentTitle = $"{title}: Q&A {questionNumber}";
                         }
 
-                        // TODO: Get the catechism answer
+                        // Remove bold and italic tags, and any basic tables
+                        childNode.InnerHtml = childNode.InnerHtml.RemoveFormattingTags();
+
+                        // Get the catechism question and answer
+                        currentEntry.Contents += ProcessContents(childNode.GetDirectInnerText());
+
+                        // Set the file name and title
+                        currentEntry.FileName = currentFileName;
+                        currentEntry.Title = currentTitle;
+
+                        // Reset the filename
+                        currentFileName = string.Empty;
                     }
 
                     if (currentEntry.FileName != currentFileName)
@@ -189,7 +207,7 @@ namespace Conglomo.Confessions.Indexer
                         };
                     }
                 }
-                else if (childNode.Name == "p")
+                else if (childNode.Name == "p" || childNode.Name == "li")
                 {
                     // See if we are adding to an existing entry
                     if (!string.IsNullOrWhiteSpace(currentEntry.Contents))
@@ -198,11 +216,7 @@ namespace Conglomo.Confessions.Indexer
                     }
 
                     // Remove bold and italic tags
-                    childNode.InnerHtml = childNode.InnerHtml
-                        .Replace("<em>", string.Empty, StringComparison.OrdinalIgnoreCase)
-                        .Replace("</em>", string.Empty, StringComparison.OrdinalIgnoreCase)
-                        .Replace("<strong>", string.Empty, StringComparison.OrdinalIgnoreCase)
-                        .Replace("</strong>", string.Empty, StringComparison.OrdinalIgnoreCase);
+                    childNode.InnerHtml = childNode.InnerHtml.RemoveFormattingTags();
 
                     // Get the contents
                     currentEntry.Contents += ProcessContents(childNode.GetDirectInnerText());

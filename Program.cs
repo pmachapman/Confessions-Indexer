@@ -30,7 +30,7 @@ namespace Conglomo.Confessions.Indexer
         /// Defines the entry point of the application.
         /// </summary>
         /// <param name="args">The arguments.</param>
-        public static void Main(string[] args)
+        public static int Main(string[] args)
         {
             // Handle any command line arguments
             string path = Directory.GetCurrentDirectory();
@@ -39,7 +39,7 @@ namespace Conglomo.Confessions.Indexer
                 if (args.FirstOrDefault() == "/?")
                 {
                     ShowAbout();
-                    return;
+                    return 0;
                 }
                 else if (args.Any())
                 {
@@ -75,10 +75,15 @@ namespace Conglomo.Confessions.Indexer
                     else
                     {
                         // Exit - this issue should be resolved before an index is generated
-                        return;
+                        return 1;
                     }
+
+                    // TODO: Create the scripture index for this file
                 }
             }
+
+            // Success
+            return 0;
         }
 
         /// <summary>

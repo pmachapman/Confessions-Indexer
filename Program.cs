@@ -30,6 +30,9 @@ namespace Conglomo.Confessions.Indexer
         /// Defines the entry point of the application.
         /// </summary>
         /// <param name="args">The arguments.</param>
+        /// <returns>
+        ///   <c>0</c> on success; otherwise <c>1</c> on failure.
+        /// </returns>
         public static int Main(string[] args)
         {
             // Handle any command line arguments
@@ -59,26 +62,34 @@ namespace Conglomo.Confessions.Indexer
             }
 
             // Get all HTML files in the directory
+            long id = 0L;
             foreach (string fileName in fileNames)
             {
                 if (!fileName.EndsWith(FileNamesToIgnore, StringComparison.OrdinalIgnoreCase))
                 {
-                    ConfessionFileParser parser = new ConfessionFileParser(fileName);
+                    ConfessionFileParser parser = new ConfessionFileParser(fileName, id);
                     if (parser.IsValid)
                     {
-                        // TODO: Create the index for this file
+                        // TODO: Create the search index for this file
                         foreach (SearchIndex searchIndex in parser.SearchIndex)
                         {
                             Log.Info(searchIndex.ToString());
                         }
+
+                        // TODO: Create the scripture index for this file
+                        foreach (ScriptureIndex scriptureIndex in parser.ScriptureIndex)
+                        {
+                            Log.Info(scriptureIndex.ToString());
+                        }
+
+                        // Update the last identifier
+                        id = parser.LastId;
                     }
                     else
                     {
                         // Exit - this issue should be resolved before an index is generated
                         return 1;
                     }
-
-                    // TODO: Create the scripture index for this file
                 }
             }
 

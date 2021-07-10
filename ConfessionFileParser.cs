@@ -11,9 +11,9 @@ namespace Conglomo.Confessions.Indexer
     using System.Collections.ObjectModel;
     using System.IO;
     using System.Linq;
-    using System.Text;
     using System.Text.RegularExpressions;
     using System.Web;
+    using GoToBible.Model;
     using HtmlAgilityPack;
 
     /// <summary>
@@ -22,7 +22,12 @@ namespace Conglomo.Confessions.Indexer
     internal class ConfessionFileParser
     {
         /// <summary>
-        /// The search index entires.
+        /// The scripture index entires.
+        /// </summary>
+        private readonly List<ScriptureIndex> scriptureIndexEntries = new List<ScriptureIndex>();
+
+        /// <summary>
+        /// The search index entries.
         /// </summary>
         private readonly List<SearchIndex> searchIndexEntries = new List<SearchIndex>();
 
@@ -30,8 +35,10 @@ namespace Conglomo.Confessions.Indexer
         /// Initialises a new instance of the <see cref="ConfessionFileParser" /> class.
         /// </summary>
         /// <param name="path">The full path to the confession HTML file.</param>
-        public ConfessionFileParser(string path)
+        /// <param name="id">The identifier to start from.</param>
+        public ConfessionFileParser(string path, long id)
         {
+            this.LastId = id;
             this.IsValid = this.LoadFile(path);
         }
 
@@ -50,6 +57,25 @@ namespace Conglomo.Confessions.Indexer
         /// The full path.
         /// </value>
         public string FullPath { get; private set; } = string.Empty;
+
+        /// <summary>
+        /// Gets the last identifier to be assigned.
+        /// </summary>
+        /// <value>
+        /// The last identifier.
+        /// </value>
+        public long LastId { get; private set; }
+
+        /// <summary>
+        /// Gets the scripture index entries.
+        /// </summary>
+        /// <value>
+        /// The scripture index entries.
+        /// </value>
+        public ReadOnlyCollection<ScriptureIndex> ScriptureIndex
+        {
+            get => this.scriptureIndexEntries.AsReadOnly();
+        }
 
         /// <summary>
         /// Gets the search index entries.
@@ -94,6 +120,39 @@ namespace Conglomo.Confessions.Indexer
         }
 
         /// <summary>
+        /// Processes the scripture references.
+        /// </summary>
+        /// <param name="id">The search index identifier.</param>
+        /// <param name="node">The node.</param>
+        private void ProcessScriptureReferences(long id, HtmlNode node)
+        {
+            foreach (HtmlNode childNode in node.ChildNodes)
+            {
+                // Get all references from the contents
+                if (childNode.HasAttributes && childNode.Attributes["class"]?.Value == "references")
+                {
+                    // Get all references from the references div
+                    this.ProcessScriptureReferences(id, childNode);
+                }
+                else if (childNode.Name == "a"
+                    && !string.IsNullOrWhiteSpace(childNode.Attributes["href"]?.Value)
+                    && childNode.Attributes["href"].Value.StartsWith("https://goto.bible/", StringComparison.OrdinalIgnoreCase))
+                {
+                    ScriptureIndex scriptureIndex = new ScriptureIndex
+                    {
+                        Address = childNode.Attributes["href"].Value,
+                        Reference = childNode.InnerText,
+                        SearchIndexId = id,
+                    };
+                    ChapterReference chapterReference = new ChapterReference(scriptureIndex.Reference);
+                    scriptureIndex.ChapterNumber = chapterReference.ChapterNumber;
+                    scriptureIndex.Book = chapterReference.Book;
+                    this.scriptureIndexEntries.Add(scriptureIndex);
+                }
+            }
+        }
+
+        /// <summary>
         /// Loads the HTML file.
         /// </summary>
         /// <param name="path">The path.</param>
@@ -103,7 +162,6 @@ namespace Conglomo.Confessions.Indexer
         private bool LoadFile(string path)
         {
             // Prepare class variables
-            this.searchIndexEntries.Clear();
             this.FullPath = path;
 
             // Load the document
@@ -157,11 +215,12 @@ namespace Conglomo.Confessions.Indexer
             SearchIndex currentEntry = new SearchIndex
             {
                 FileName = fileName,
+                Id = ++this.LastId,
                 Title = HttpUtility.HtmlDecode(title),
             };
             foreach (HtmlNode childNode in childNodes)
             {
-                if (childNode.HasAttributes && !string.IsNullOrWhiteSpace(childNode.Attributes["id"]?.Value ?? string.Empty))
+                if (childNode.HasAttributes && !string.IsNullOrWhiteSpace(childNode.Attributes["id"]?.Value))
                 {
                     string id = childNode.Attributes["id"].Value;
                     string currentFileName = $"{fileName}#{id}";
@@ -185,6 +244,9 @@ namespace Conglomo.Confessions.Indexer
                         // Get the catechism question and answer
                         currentEntry.Contents += ProcessContents(childNode.GetDirectInnerText());
 
+                        // Get the scripture references for the question and answer
+                        this.ProcessScriptureReferences(currentEntry.Id, childNode);
+
                         // Set the file name and title
                         currentEntry.FileName = currentFileName;
                         currentEntry.Title = currentTitle;
@@ -203,6 +265,7 @@ namespace Conglomo.Confessions.Indexer
                         currentEntry = new SearchIndex
                         {
                             FileName = currentFileName,
+                            Id = ++this.LastId,
                             Title = HttpUtility.HtmlDecode(currentTitle),
                         };
                     }
@@ -220,6 +283,9 @@ namespace Conglomo.Confessions.Indexer
 
                     // Get the contents
                     currentEntry.Contents += ProcessContents(childNode.GetDirectInnerText());
+
+                    // Get the scripture references for the article
+                    this.ProcessScriptureReferences(currentEntry.Id, childNode);
                 }
             }
 

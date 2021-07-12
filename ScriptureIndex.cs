@@ -9,7 +9,7 @@ namespace Conglomo.Confessions.Indexer
     /// <summary>
     /// A Scripture Index record.
     /// </summary>
-    public record ScriptureIndex
+    public record ScriptureIndex : IIdentifiable
     {
         /// <summary>
         /// Gets or sets the address to view the scripture reference.
@@ -36,12 +36,28 @@ namespace Conglomo.Confessions.Indexer
         public int ChapterNumber { get; set; }
 
         /// <summary>
+        /// Gets or sets the identifier.
+        /// </summary>
+        /// <value>
+        /// The identifier.
+        /// </value>
+        public long Id { get; set; }
+
+        /// <summary>
         /// Gets or sets the scripture reference.
         /// </summary>
         /// <value>
         /// The scripture reference.
         /// </value>
         public string Reference { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Gets or sets the index of the search.
+        /// </summary>
+        /// <value>
+        /// The index of the search.
+        /// </value>
+        public virtual SearchIndex? SearchIndex { get; set; }
 
         /// <summary>
         /// Gets or sets the search index identifier.

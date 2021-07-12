@@ -64,7 +64,7 @@ namespace Conglomo.Confessions.Indexer.Properties {
         ///   Looks up a localized string similar to 
         ///Generates a SQLite database for the Creeds and Confessions assets directory at the path specified.
         ///
-        ///INDEX [drive:][path]
+        ///INDEX &quot;[drive:][path]&quot; &quot;[ConnectionString]&quot;
         ///
         ///If a path is not specified, the index is generated for the current working directory..
         /// </summary>

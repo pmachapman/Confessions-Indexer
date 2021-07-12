@@ -121,7 +121,7 @@
     <value>
 Generates a SQLite database for the Creeds and Confessions assets directory at the path specified.
 
-INDEX [drive:][path]
+INDEX "[drive:][path]" "[ConnectionString]"
 
 If a path is not specified, the index is generated for the current working directory.</value>
   </data>

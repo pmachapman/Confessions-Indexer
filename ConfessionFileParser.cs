@@ -147,7 +147,14 @@ namespace Conglomo.Confessions.Indexer
                     ChapterReference chapterReference = new ChapterReference(scriptureIndex.Reference);
                     scriptureIndex.ChapterNumber = chapterReference.ChapterNumber;
                     scriptureIndex.Book = chapterReference.Book;
-                    this.scriptureIndexEntries.Add(scriptureIndex);
+
+                    // Check the unique key
+                    if (!this.scriptureIndexEntries.Any(s => s.SearchIndexId == scriptureIndex.SearchIndexId
+                        && s.Book == scriptureIndex.Book
+                        && s.ChapterNumber == scriptureIndex.ChapterNumber))
+                    {
+                        this.scriptureIndexEntries.Add(scriptureIndex);
+                    }
                 }
             }
         }

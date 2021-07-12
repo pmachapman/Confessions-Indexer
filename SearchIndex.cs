@@ -6,10 +6,12 @@
 
 namespace Conglomo.Confessions.Indexer
 {
+    using System.Collections.Generic;
+
     /// <summary>
     /// A search index record.
     /// </summary>
-    public record SearchIndex
+    public record SearchIndex : IIdentifiable
     {
         /// <summary>
         /// Gets or sets the contents.
@@ -34,6 +36,14 @@ namespace Conglomo.Confessions.Indexer
         /// The identifier.
         /// </value>
         public long Id { get; set; }
+
+        /// <summary>
+        /// Gets the scripture indices for this search index entry.
+        /// </summary>
+        /// <value>
+        /// The scripture indices.
+        /// </value>
+        public virtual ICollection<ScriptureIndex> ScriptureIndex { get; } = new HashSet<ScriptureIndex>();
 
         /// <summary>
         /// Gets or sets the title.

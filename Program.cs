@@ -10,6 +10,10 @@ namespace Conglomo.Confessions.Indexer
     using System.IO;
     using System.Linq;
     using System.Reflection;
+    using System.Threading.Tasks;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Infrastructure;
+    using Microsoft.EntityFrameworkCore.Storage;
 
     /// <summary>
     /// The Creeds and Confessions Search Indexer Program.
@@ -33,33 +37,57 @@ namespace Conglomo.Confessions.Indexer
         /// <returns>
         ///   <c>0</c> on success; otherwise <c>1</c> on failure.
         /// </returns>
-        public static int Main(string[] args)
+        public static async Task<int> Main(string[] args)
         {
-            // Handle any command line arguments
-            string path = Directory.GetCurrentDirectory();
+            // Show help if required
+            if (args?.FirstOrDefault() == "/?")
+            {
+                ShowAbout();
+                return 0;
+            }
+
+            // Parse the command line arguments
+            IndexerConfiguration configuration = new IndexerConfiguration
+            {
+                ConnectionString = "Data Source=:memory:",
+                Database = Database.SQLite,
+                Path = Directory.GetCurrentDirectory(),
+            };
+
             if (args != null)
             {
-                if (args.FirstOrDefault() == "/?")
-                {
-                    ShowAbout();
-                    return 0;
-                }
-                else if (args.Any())
-                {
-                    path = args.First();
-                }
+                configuration.ParseArguments(args);
+            }
+
+            if (!configuration.IsValid())
+            {
+                // Exit - this issue should be resolved before an index is generated
+                return 1;
             }
 
             // Get the filenames
             string[] fileNames;
-            if (path.EndsWith(".html", StringComparison.OrdinalIgnoreCase))
+            if (configuration.Path.IsFile())
             {
-                fileNames = new string[] { path };
+                fileNames = new string[] { configuration.Path };
             }
             else
             {
-                fileNames = Directory.GetFiles(path, "*.html");
+                fileNames = Directory.GetFiles(configuration.Path, "*.html");
             }
+
+            // Connect to the database
+            using DataContext context = new DataContext(configuration.DbContextOptions<DataContext>());
+
+            // Drop all existing tables
+            await context.DropTablesAsync();
+
+            // Create the tables
+            RelationalDatabaseCreator databaseCreator = (RelationalDatabaseCreator)context.Database.GetService<IDatabaseCreator>();
+            databaseCreator.CreateTables();
+
+            // Drop the DatabaseName table
+            await context.DropTablesAsync(typeof(DatabaseTable).Name);
 
             // Get all HTML files in the directory
             long id = 0L;
@@ -70,17 +98,25 @@ namespace Conglomo.Confessions.Indexer
                     ConfessionFileParser parser = new ConfessionFileParser(fileName, id);
                     if (parser.IsValid)
                     {
-                        // TODO: Create the search index for this file
+                        // Create the search index for this file
                         foreach (SearchIndex searchIndex in parser.SearchIndex)
                         {
                             Log.Info(searchIndex.ToString());
+                            context.SearchIndex.Add(searchIndex);
                         }
 
-                        // TODO: Create the scripture index for this file
+                        // Save changes to SearchIndex with identity insert
+                        await context.SaveChangesWithIdentityInsertAsync<SearchIndex>();
+
+                        // Create the scripture index for this file
                         foreach (ScriptureIndex scriptureIndex in parser.ScriptureIndex)
                         {
                             Log.Info(scriptureIndex.ToString());
+                            context.ScriptureIndex.Add(scriptureIndex);
                         }
+
+                        // Save changes to ScriptureIndex
+                        await context.SaveChangesAsync();
 
                         // Update the last identifier
                         id = parser.LastId;
@@ -92,6 +128,10 @@ namespace Conglomo.Confessions.Indexer
                     }
                 }
             }
+
+            // Add the synonyms to the database
+            await context.Synonyms.AddRangeAsync(Synonyms.All);
+            await context.SaveChangesAsync();
 
             // Success
             return 0;

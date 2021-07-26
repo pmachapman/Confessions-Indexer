@@ -108,6 +108,12 @@ namespace Conglomo.Confessions.Indexer
                         // Save changes to SearchIndex with identity insert
                         await context.SaveChangesWithIdentityInsertAsync<SearchIndex>();
 
+                        // Create the confession record
+                        if (parser.Confession != null)
+                        {
+                            await context.Confessions.AddAsync(parser.Confession);
+                        }
+
                         // Create the scripture index for this file
                         foreach (ScriptureIndex scriptureIndex in parser.ScriptureIndex)
                         {
@@ -115,7 +121,7 @@ namespace Conglomo.Confessions.Indexer
                             context.ScriptureIndex.Add(scriptureIndex);
                         }
 
-                        // Save changes to ScriptureIndex
+                        // Save changes to ScriptureIndex and Confession
                         await context.SaveChangesAsync();
 
                         // Update the last identifier
@@ -132,6 +138,15 @@ namespace Conglomo.Confessions.Indexer
             // Add the synonyms to the database
             await context.Synonyms.AddRangeAsync(Synonyms.All);
             await context.SaveChangesAsync();
+
+            // Build the full text search index
+            if (configuration.Database == Database.SQLite)
+            {
+                await context.Database.ExecuteSqlRawAsync("CREATE VIRTUAL TABLE SearchIndexFts USING fts4(content='SearchIndex', Contents);");
+                await context.Database.ExecuteSqlRawAsync("INSERT INTO SearchIndexFts(docid, Contents) SELECT Id, Contents FROM SearchIndex;");
+                await context.Database.ExecuteSqlRawAsync("INSERT INTO SearchIndexFts(SearchIndexFts) VALUES ('optimize');");
+                await context.Database.ExecuteSqlRawAsync("VACUUM;");
+            }
 
             // Success
             return 0;

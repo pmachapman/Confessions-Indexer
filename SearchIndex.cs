@@ -29,12 +29,7 @@ namespace Conglomo.Confessions.Indexer
         /// </value>
         public string FileName { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the identifier.
-        /// </summary>
-        /// <value>
-        /// The identifier.
-        /// </value>
+        /// <inheritdoc/>
         public long Id { get; set; }
 
         /// <summary>

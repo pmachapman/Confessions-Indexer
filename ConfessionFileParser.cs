@@ -43,6 +43,14 @@ namespace Conglomo.Confessions.Indexer
         }
 
         /// <summary>
+        /// Gets the confession.
+        /// </summary>
+        /// <value>
+        /// The confession.
+        /// </value>
+        public Confession? Confession { get; private set; }
+
+        /// <summary>
         /// Gets a value indicating whether this instance is valid.
         /// </summary>
         /// <value>
@@ -187,10 +195,10 @@ namespace Conglomo.Confessions.Indexer
 
             // Get the title
             string title;
-            HtmlNode? titleNode = doc.DocumentNode.SelectSingleNode("//h1");
+            HtmlNode? titleNode = doc.DocumentNode.SelectSingleNode("//title");
             if (titleNode == null)
             {
-                Log.Warning($"Element $('h1') not found.");
+                Log.Warning($"Element $('title') not found.");
                 return false;
             }
             else
@@ -205,6 +213,16 @@ namespace Conglomo.Confessions.Indexer
                 Log.Warning($"Element $('article#main') not found.");
                 return false;
             }
+
+            // Create the confession object
+            this.Confession = new Confession
+            {
+                Country = articleNode.GetDataAttribute("country").Value,
+                FileName = fileName,
+                Title = HttpUtility.HtmlDecode(title),
+                Tradition = articleNode.GetDataAttribute("tradition").Value,
+                Year = Convert.ToInt32(articleNode.GetDataAttribute("year").Value),
+            };
 
             // Get the child nodes, and add any OL nodes (for catechisms)
             List<HtmlNode> childNodes = articleNode.ChildNodes.ToList();

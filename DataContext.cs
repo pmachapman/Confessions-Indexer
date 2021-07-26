@@ -12,6 +12,7 @@ namespace Conglomo.Confessions.Indexer
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Metadata;
 
     /// <summary>
     /// The data context.
@@ -27,6 +28,14 @@ namespace Conglomo.Confessions.Indexer
           : base(options)
         {
         }
+
+        /// <summary>
+        /// Gets or sets the confessions.
+        /// </summary>
+        /// <value>
+        /// The confessions.
+        /// </value>
+        public DbSet<Confession> Confessions { get; set; } = default!;
 
         /// <summary>
         /// Gets or sets the database tables.
@@ -90,14 +99,15 @@ namespace Conglomo.Confessions.Indexer
             {
                 if (this.Database.IsSqlServer())
                 {
-                    databaseTable.TableName
+                    databaseTable.TableName = databaseTable.TableName
                         .Replace("[", "\\[", StringComparison.OrdinalIgnoreCase)
                         .Replace("]", "\\]", StringComparison.OrdinalIgnoreCase);
                     await this.Database.ExecuteSqlRawAsync($"DROP TABLE [{databaseTable.TableName}]", cancellationToken);
                 }
-                else
+                else if (!databaseTable.TableName.Contains('_', StringComparison.OrdinalIgnoreCase))
                 {
-                    databaseTable.TableName
+                    // SQLite created tables contain underscores
+                    databaseTable.TableName = databaseTable.TableName
                         .Replace("`", "\\`", StringComparison.OrdinalIgnoreCase)
                         .Replace("`", "\\`", StringComparison.OrdinalIgnoreCase);
                     await this.Database.ExecuteSqlRawAsync($"DROP TABLE `{databaseTable.TableName}`", cancellationToken);
@@ -166,8 +176,7 @@ namespace Conglomo.Confessions.Indexer
 
             modelBuilder.Entity<DatabaseTable>()
                 .ToSqlQuery(query)
-                .HasNoKey()
-                .ToTable(typeof(DatabaseTable).Name);
+                .HasNoKey();
             modelBuilder.Entity<ScriptureIndex>()
                 .HasKey(s => s.Id);
             modelBuilder.Entity<ScriptureIndex>()
@@ -187,6 +196,14 @@ namespace Conglomo.Confessions.Indexer
                 .HasKey(s => s.Id);
             modelBuilder.Entity<Synonym>()
                 .HasKey(s => s.Id);
+
+            // Use singular table names
+            foreach (IMutableEntityType entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                // Use the entity name instead of the Context.DbSet<T> name
+                // refs https://docs.microsoft.com/en-us/ef/core/modeling/entity-types?tabs=fluent-api#table-name
+                modelBuilder.Entity(entityType.ClrType).ToTable(entityType.ClrType.Name);
+            }
         }
     }
 }

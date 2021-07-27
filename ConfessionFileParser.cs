@@ -260,7 +260,7 @@ namespace Conglomo.Confessions.Indexer
                         string questionNumber = new string(id.Where(char.IsDigit).ToArray());
                         if (!string.IsNullOrWhiteSpace(questionNumber))
                         {
-                            currentTitle = $"{title}: Q&A {questionNumber}";
+                            currentTitle = $"{title}: Question & Answer {questionNumber}";
                         }
 
                         // Remove bold and italic tags, and any basic tables

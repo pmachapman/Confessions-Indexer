@@ -4,6 +4,8 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+using System.Collections.Generic;
+
 namespace Conglomo.Confessions.Indexer
 {
     /// <summary>
@@ -30,6 +32,14 @@ namespace Conglomo.Confessions.Indexer
 
         /// <inheritdoc/>
         public long Id { get; set; }
+
+        /// <summary>
+        /// Gets the search indices for this confession.
+        /// </summary>
+        /// <value>
+        /// The search indices.
+        /// </value>
+        public virtual ICollection<SearchIndex> SearchIndex { get; } = new HashSet<SearchIndex>();
 
         /// <summary>
         /// Gets or sets the title.

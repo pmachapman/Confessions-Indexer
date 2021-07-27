@@ -194,6 +194,12 @@ namespace Conglomo.Confessions.Indexer
                 .HasForeignKey(s => s.SearchIndexId);
             modelBuilder.Entity<SearchIndex>()
                 .HasKey(s => s.Id);
+            modelBuilder.Entity<SearchIndex>()
+                .HasIndex(s => s.ConfessionId);
+            modelBuilder.Entity<SearchIndex>()
+                .HasOne(s => s.Confession)
+                .WithMany(c => c!.SearchIndex)
+                .HasForeignKey(s => s.ConfessionId);
             modelBuilder.Entity<Synonym>()
                 .HasKey(s => s.Id);
 

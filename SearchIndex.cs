@@ -14,6 +14,22 @@ namespace Conglomo.Confessions.Indexer
     public record SearchIndex : IIdentifiable
     {
         /// <summary>
+        /// Gets or sets the confession.
+        /// </summary>
+        /// <value>
+        /// The confession.
+        /// </value>
+        public virtual Confession? Confession { get; set; }
+
+        /// <summary>
+        /// Gets or sets the confession identifier.
+        /// </summary>
+        /// <value>
+        /// The confession identifier.
+        /// </value>
+        public long ConfessionId { get; set; }
+
+        /// <summary>
         /// Gets or sets the contents.
         /// </summary>
         /// <value>

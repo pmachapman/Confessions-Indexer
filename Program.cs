@@ -98,21 +98,29 @@ namespace Conglomo.Confessions.Indexer
                     ConfessionFileParser parser = new ConfessionFileParser(fileName, id);
                     if (parser.IsValid)
                     {
+                        // Create the confession record
+                        long confessionId;
+                        if (parser.Confession != null)
+                        {
+                            await context.Confessions.AddAsync(parser.Confession);
+                            await context.SaveChangesAsync();
+                            confessionId = parser.Confession.Id;
+                        }
+                        else
+                        {
+                            confessionId = 0L;
+                        }
+
                         // Create the search index for this file
                         foreach (SearchIndex searchIndex in parser.SearchIndex)
                         {
                             Log.Info(searchIndex.ToString());
+                            searchIndex.ConfessionId = confessionId;
                             context.SearchIndex.Add(searchIndex);
                         }
 
                         // Save changes to SearchIndex with identity insert
                         await context.SaveChangesWithIdentityInsertAsync<SearchIndex>();
-
-                        // Create the confession record
-                        if (parser.Confession != null)
-                        {
-                            await context.Confessions.AddAsync(parser.Confession);
-                        }
 
                         // Create the scripture index for this file
                         foreach (ScriptureIndex scriptureIndex in parser.ScriptureIndex)
@@ -121,7 +129,7 @@ namespace Conglomo.Confessions.Indexer
                             context.ScriptureIndex.Add(scriptureIndex);
                         }
 
-                        // Save changes to ScriptureIndex and Confession
+                        // Save changes to ScriptureIndex
                         await context.SaveChangesAsync();
 
                         // Update the last identifier

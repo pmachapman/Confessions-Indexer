@@ -47,10 +47,10 @@ namespace Conglomo.Confessions.Indexer
         public string Reference { get; set; } = string.Empty;
 
         /// <summary>
-        /// Gets or sets the index of the search.
+        /// Gets or sets the search index record.
         /// </summary>
         /// <value>
-        /// The index of the search.
+        /// The search index record.
         /// </value>
         public virtual SearchIndex? SearchIndex { get; set; }
 

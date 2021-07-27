@@ -142,7 +142,7 @@ namespace Conglomo.Confessions.Indexer
             // Build the full text search index
             if (configuration.Database == Database.SQLite)
             {
-                await context.Database.ExecuteSqlRawAsync("CREATE VIRTUAL TABLE SearchIndexFts USING fts4(content='SearchIndex', Contents);");
+                await context.Database.ExecuteSqlRawAsync("CREATE VIRTUAL TABLE SearchIndexFts USING fts4(content=`SearchIndex`, Contents);");
                 await context.Database.ExecuteSqlRawAsync("INSERT INTO SearchIndexFts(docid, Contents) SELECT Id, Contents FROM SearchIndex;");
                 await context.Database.ExecuteSqlRawAsync("INSERT INTO SearchIndexFts(SearchIndexFts) VALUES ('optimize');");
                 await context.Database.ExecuteSqlRawAsync("VACUUM;");

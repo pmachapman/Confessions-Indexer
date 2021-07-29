@@ -4,10 +4,10 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-using System.Collections.Generic;
-
 namespace Conglomo.Confessions.Indexer
 {
+    using System.Collections.Generic;
+
     /// <summary>
     /// A Christian Creed or Confession.
     /// </summary>

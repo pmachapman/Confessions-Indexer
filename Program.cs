@@ -79,8 +79,11 @@ namespace Conglomo.Confessions.Indexer
             // Connect to the database
             using DataContext context = new DataContext(configuration.DbContextOptions<DataContext>());
 
-            // Drop all existing tables
-            await context.DropTablesAsync();
+            // Drop all existing tables, to work around foreign keys
+            await context.DropTablesAsync("Synonym");
+            await context.DropTablesAsync("ScriptureIndex");
+            await context.DropTablesAsync("SearchIndex");
+            await context.DropTablesAsync("Confession");
 
             // Create the tables
             RelationalDatabaseCreator databaseCreator = (RelationalDatabaseCreator)context.Database.GetService<IDatabaseCreator>();

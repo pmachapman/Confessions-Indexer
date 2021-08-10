@@ -11,6 +11,7 @@ namespace Conglomo.Confessions.Indexer
     using System.Linq;
     using System.Reflection;
     using System.Threading.Tasks;
+    using Microsoft.Data.Sqlite;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Infrastructure;
     using Microsoft.EntityFrameworkCore.Storage;
@@ -40,7 +41,7 @@ namespace Conglomo.Confessions.Indexer
         public static async Task<int> Main(string[] args)
         {
             // Show help if required
-            if (args?.FirstOrDefault() == "/?")
+            if (args.FirstOrDefault() == "/?")
             {
                 ShowAbout();
                 return 0;
@@ -49,15 +50,11 @@ namespace Conglomo.Confessions.Indexer
             // Parse the command line arguments
             IndexerConfiguration configuration = new IndexerConfiguration
             {
-                ConnectionString = "Data Source=:memory:",
+                ConnectionString = "DataSource=confessions;mode=memory;cache=shared",
                 Database = Database.SQLite,
                 Path = Directory.GetCurrentDirectory(),
             };
-
-            if (args != null)
-            {
-                configuration.ParseArguments(args);
-            }
+            configuration.ParseArguments(args);
 
             if (!configuration.IsValid())
             {
@@ -65,102 +62,122 @@ namespace Conglomo.Confessions.Indexer
                 return 1;
             }
 
-            // Get the filenames
+            // Get the file names
             string[] fileNames;
             if (configuration.Path.IsFile())
             {
-                fileNames = new string[] { configuration.Path };
+                fileNames = new[] { configuration.Path };
             }
             else
             {
                 fileNames = Directory.GetFiles(configuration.Path, "*.html");
             }
 
-            // Connect to the database
-            using DataContext context = new DataContext(configuration.DbContextOptions<DataContext>());
-
-            // Drop all existing tables, to work around foreign keys
-            await context.DropTablesAsync("Synonym");
-            await context.DropTablesAsync("ScriptureIndex");
-            await context.DropTablesAsync("SearchIndex");
-            await context.DropTablesAsync("Confession");
-
-            // Create the tables
-            RelationalDatabaseCreator databaseCreator = (RelationalDatabaseCreator)context.Database.GetService<IDatabaseCreator>();
-            databaseCreator.CreateTables();
-
-            // Drop the DatabaseName table
-            await context.DropTablesAsync(typeof(DatabaseTable).Name);
-
-            // Get all HTML files in the directory
-            long id = 0L;
-            foreach (string fileName in fileNames)
+            // If we are using SQLite in-memory, we need to keep the connection open
+            SqliteConnection? keepAliveConnection = null;
+            try
             {
-                if (!fileName.EndsWith(FileNamesToIgnore, StringComparison.OrdinalIgnoreCase))
+                if (configuration.ConnectionString.Contains("mode=memory", StringComparison.OrdinalIgnoreCase)
+                    || configuration.ConnectionString.Contains(":memory:", StringComparison.OrdinalIgnoreCase))
                 {
-                    ConfessionFileParser parser = new ConfessionFileParser(fileName, id);
-                    if (parser.IsValid)
+                    keepAliveConnection = new SqliteConnection(configuration.ConnectionString);
+                    keepAliveConnection.Open();
+                }
+
+                // Connect to the database
+                await using DataContext context = new DataContext(configuration.DbContextOptions<DataContext>());
+
+                // Drop all existing tables, to work around foreign keys
+                await context.DropTablesAsync("Synonym");
+                await context.DropTablesAsync("ScriptureIndex");
+                await context.DropTablesAsync("SearchIndex");
+                await context.DropTablesAsync("Confession");
+
+                // Create the tables
+                RelationalDatabaseCreator databaseCreator = (RelationalDatabaseCreator)context.Database.GetService<IDatabaseCreator>();
+                await databaseCreator.CreateTablesAsync();
+
+                // Drop the DatabaseName table
+                await context.DropTablesAsync(nameof(DatabaseTable));
+
+                // Get all HTML files in the directory
+                long id = 0L;
+                foreach (string fileName in fileNames)
+                {
+                    if (!fileName.EndsWith(FileNamesToIgnore, StringComparison.OrdinalIgnoreCase))
                     {
-                        // Create the confession record
-                        long confessionId;
-                        if (parser.Confession != null)
+                        ConfessionFileParser parser = new ConfessionFileParser(fileName, id);
+                        if (parser.IsValid)
                         {
-                            await context.Confessions.AddAsync(parser.Confession);
+                            // Create the confession record
+                            long confessionId;
+                            if (parser.Confession != null)
+                            {
+                                await context.Confessions.AddAsync(parser.Confession);
+                                await context.SaveChangesAsync();
+                                confessionId = parser.Confession.Id;
+                            }
+                            else
+                            {
+                                confessionId = 0L;
+                            }
+
+                            // Create the search index for this file
+                            foreach (SearchIndex searchIndex in parser.SearchIndex)
+                            {
+                                Log.Info(searchIndex.ToString());
+                                searchIndex.ConfessionId = confessionId;
+                                context.SearchIndex.Add(searchIndex);
+                            }
+
+                            // Save changes to SearchIndex with identity insert
+                            await context.SaveChangesWithIdentityInsertAsync<SearchIndex>();
+
+                            // Create the scripture index for this file
+                            foreach (ScriptureIndex scriptureIndex in parser.ScriptureIndex)
+                            {
+                                Log.Info(scriptureIndex.ToString());
+                                context.ScriptureIndex.Add(scriptureIndex);
+                            }
+
+                            // Save changes to ScriptureIndex
                             await context.SaveChangesAsync();
-                            confessionId = parser.Confession.Id;
+
+                            // Update the last identifier
+                            id = parser.LastId;
                         }
                         else
                         {
-                            confessionId = 0L;
+                            // Exit - this issue should be resolved before an index is generated
+                            return 1;
                         }
-
-                        // Create the search index for this file
-                        foreach (SearchIndex searchIndex in parser.SearchIndex)
-                        {
-                            Log.Info(searchIndex.ToString());
-                            searchIndex.ConfessionId = confessionId;
-                            context.SearchIndex.Add(searchIndex);
-                        }
-
-                        // Save changes to SearchIndex with identity insert
-                        await context.SaveChangesWithIdentityInsertAsync<SearchIndex>();
-
-                        // Create the scripture index for this file
-                        foreach (ScriptureIndex scriptureIndex in parser.ScriptureIndex)
-                        {
-                            Log.Info(scriptureIndex.ToString());
-                            context.ScriptureIndex.Add(scriptureIndex);
-                        }
-
-                        // Save changes to ScriptureIndex
-                        await context.SaveChangesAsync();
-
-                        // Update the last identifier
-                        id = parser.LastId;
-                    }
-                    else
-                    {
-                        // Exit - this issue should be resolved before an index is generated
-                        return 1;
                     }
                 }
+
+                // Add the synonyms to the database
+                await context.Synonyms.AddRangeAsync(Synonyms.All);
+                await context.SaveChangesAsync();
+
+                // Build the full text search index
+                if (configuration.Database == Database.SQLite)
+                {
+                    await context.Database.ExecuteSqlRawAsync("CREATE VIRTUAL TABLE SearchIndexFts USING fts4(content=`SearchIndex`, Contents);");
+                    await context.Database.ExecuteSqlRawAsync("INSERT INTO SearchIndexFts(docid, Contents) SELECT Id, Contents FROM SearchIndex;");
+                    await context.Database.ExecuteSqlRawAsync("INSERT INTO SearchIndexFts(SearchIndexFts) VALUES ('optimize');");
+                    await context.Database.ExecuteSqlRawAsync("VACUUM;");
+                }
+
+                // Success
+                return 0;
             }
-
-            // Add the synonyms to the database
-            await context.Synonyms.AddRangeAsync(Synonyms.All);
-            await context.SaveChangesAsync();
-
-            // Build the full text search index
-            if (configuration.Database == Database.SQLite)
+            finally
             {
-                await context.Database.ExecuteSqlRawAsync("CREATE VIRTUAL TABLE SearchIndexFts USING fts4(content=`SearchIndex`, Contents);");
-                await context.Database.ExecuteSqlRawAsync("INSERT INTO SearchIndexFts(docid, Contents) SELECT Id, Contents FROM SearchIndex;");
-                await context.Database.ExecuteSqlRawAsync("INSERT INTO SearchIndexFts(SearchIndexFts) VALUES ('optimize');");
-                await context.Database.ExecuteSqlRawAsync("VACUUM;");
+                // Dispose the keep alive connection, if it exists
+                if (keepAliveConnection != null)
+                {
+                    await keepAliveConnection.DisposeAsync();
+                }
             }
-
-            // Success
-            return 0;
         }
 
         /// <summary>

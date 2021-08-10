@@ -102,7 +102,7 @@ namespace Conglomo.Confessions.Indexer
                     databaseTable.TableName = databaseTable.TableName
                         .Replace("[", "\\[", StringComparison.OrdinalIgnoreCase)
                         .Replace("]", "\\]", StringComparison.OrdinalIgnoreCase);
-                    await this.Database.ExecuteSqlRawAsync($"DROP TABLE [{databaseTable.TableName}]", cancellationToken);
+                    await this.Database.ExecuteSqlRawAsync($"DROP TABLE IF EXISTS [{databaseTable.TableName}]", cancellationToken);
                 }
                 else if (!databaseTable.TableName.Contains('_', StringComparison.OrdinalIgnoreCase))
                 {
@@ -110,7 +110,7 @@ namespace Conglomo.Confessions.Indexer
                     databaseTable.TableName = databaseTable.TableName
                         .Replace("`", "\\`", StringComparison.OrdinalIgnoreCase)
                         .Replace("`", "\\`", StringComparison.OrdinalIgnoreCase);
-                    await this.Database.ExecuteSqlRawAsync($"DROP TABLE `{databaseTable.TableName}`", cancellationToken);
+                    await this.Database.ExecuteSqlRawAsync($"DROP TABLE IF EXISTS `{databaseTable.TableName}`", cancellationToken);
                 }
             }
         }
@@ -139,7 +139,7 @@ namespace Conglomo.Confessions.Indexer
             {
                 // See https://docs.microsoft.com/en-us/ef/core/saving/explicit-values-generated-properties for details
                 await this.Database.OpenConnectionAsync(cancellationToken).ConfigureAwait(true);
-                int returnValue = 0;
+                int returnValue;
                 try
                 {
                     await this.Database.ExecuteSqlRawAsync($"SET IDENTITY_INSERT [{typeof(T).Name}] ON", cancellationToken).ConfigureAwait(true);

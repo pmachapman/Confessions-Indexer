@@ -22,7 +22,7 @@ namespace Conglomo.Confessions.Indexer
     internal class ConfessionFileParser
     {
         /// <summary>
-        /// The scripture index entires.
+        /// The scripture index entries.
         /// </summary>
         private readonly List<ScriptureIndex> scriptureIndexEntries = new List<ScriptureIndex>();
 
@@ -56,7 +56,7 @@ namespace Conglomo.Confessions.Indexer
         /// <value>
         ///   <c>true</c> if this instance is valid; otherwise, <c>false</c>.
         /// </value>
-        public bool IsValid { get; private set; }
+        public bool IsValid { get; }
 
         /// <summary>
         /// Gets the full path to the confession HTML file.
@@ -80,10 +80,7 @@ namespace Conglomo.Confessions.Indexer
         /// <value>
         /// The scripture index entries.
         /// </value>
-        public ReadOnlyCollection<ScriptureIndex> ScriptureIndex
-        {
-            get => this.scriptureIndexEntries.AsReadOnly();
-        }
+        public ReadOnlyCollection<ScriptureIndex> ScriptureIndex => this.scriptureIndexEntries.AsReadOnly();
 
         /// <summary>
         /// Gets the search index entries.
@@ -91,10 +88,7 @@ namespace Conglomo.Confessions.Indexer
         /// <value>
         /// The search index entries.
         /// </value>
-        public ReadOnlyCollection<SearchIndex> SearchIndex
-        {
-            get => this.searchIndexEntries.AsReadOnly();
-        }
+        public ReadOnlyCollection<SearchIndex> SearchIndex => this.searchIndexEntries.AsReadOnly();
 
         /// <summary>
         /// Processes the contents.

@@ -47,7 +47,7 @@ namespace Conglomo.Confessions.Indexer
         /// <value>
         ///   <c>true</c> if this instance is running in a unit test; otherwise, <c>false</c>.
         /// </value>
-        public static bool IsInUnitTest { get; private set; }
+        public static bool IsInUnitTest { get; }
 
         /// <summary>
         /// Logs an error message.

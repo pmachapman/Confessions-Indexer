@@ -81,8 +81,7 @@ namespace Conglomo.Confessions.Indexer
         /// </returns>
         /// <remarks>Checks for empty values or an invalid path.</remarks>
         public static bool IsValid(this IndexerConfiguration configuration)
-            => configuration != default
-                && configuration.Database != Database.None
+            => configuration.Database != Database.None
                 && !string.IsNullOrWhiteSpace(configuration.ConnectionString)
                 && !string.IsNullOrWhiteSpace(configuration.Path)
                 && (configuration.Path.IsFile() ? File.Exists(configuration.Path) : Directory.Exists(configuration.Path));
@@ -97,60 +96,54 @@ namespace Conglomo.Confessions.Indexer
         /// </returns>
         public static IndexerConfiguration ParseArguments(this IndexerConfiguration configuration, string[] args)
         {
-            if (configuration != default && args != default)
+            foreach (string arg in args)
             {
-                foreach (string arg in args)
+                try
                 {
-                    try
+                    if (Enum.TryParse(arg, true, out Database database))
                     {
-                        if (arg != default)
-                        {
-                            if (Enum.TryParse(arg, true, out Database database))
-                            {
-                                configuration.Database = database;
-                            }
-                            else if (arg.EndsWith(".html", StringComparison.OrdinalIgnoreCase))
-                            {
-                                configuration.Path = arg;
-                            }
-                            else if (arg.Contains(".db", StringComparison.OrdinalIgnoreCase))
-                            {
-                                // SQLite connection string
-                                configuration.ConnectionString = arg;
-                                configuration.Database = Database.SQLite;
-                            }
-                            else if (arg.Contains(".mdf", StringComparison.OrdinalIgnoreCase))
-                            {
-                                // Microsoft SQL Server connection string
-                                configuration.ConnectionString = arg;
-                                configuration.Database = Database.MSSQL;
-                            }
-                            else if (Directory.Exists(arg))
-                            {
-                                // Directory Path
-                                configuration.Path = arg;
-                            }
-                            else
-                            {
-                                // A connection string
-                                configuration.ConnectionString = arg;
-                            }
-                        }
+                        configuration.Database = database;
                     }
-                    catch (Exception ex)
+                    else if (arg.EndsWith(".html", StringComparison.OrdinalIgnoreCase))
                     {
-                        // Ignore errors
-                        if (!(ex is ArgumentException
-                            || ex is ArgumentNullException
-                            || ex is InvalidOperationException))
-                        {
-                            throw;
-                        }
+                        configuration.Path = arg;
+                    }
+                    else if (arg.Contains(".db", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // SQLite connection string
+                        configuration.ConnectionString = arg;
+                        configuration.Database = Database.SQLite;
+                    }
+                    else if (arg.Contains(".mdf", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Microsoft SQL Server connection string
+                        configuration.ConnectionString = arg;
+                        configuration.Database = Database.MSSQL;
+                    }
+                    else if (Directory.Exists(arg))
+                    {
+                        // Directory Path
+                        configuration.Path = arg;
+                    }
+                    else
+                    {
+                        // A connection string
+                        configuration.ConnectionString = arg;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Ignore errors
+                    if (!(ex is ArgumentException
+                          || ex is ArgumentNullException
+                          || ex is InvalidOperationException))
+                    {
+                        throw;
                     }
                 }
             }
 
-            return configuration ?? new IndexerConfiguration();
+            return configuration;
         }
 
         /// <summary>

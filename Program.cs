@@ -92,6 +92,7 @@ namespace Conglomo.Confessions.Indexer
                 await context.DropTablesAsync("ScriptureIndex");
                 await context.DropTablesAsync("SearchIndex");
                 await context.DropTablesAsync("Confession");
+                await context.DropTablesAsync("SearchIndexFts");
 
                 // Create the tables
                 RelationalDatabaseCreator databaseCreator = (RelationalDatabaseCreator)context.Database.GetService<IDatabaseCreator>();

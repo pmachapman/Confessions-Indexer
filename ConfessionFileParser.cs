@@ -281,6 +281,13 @@ namespace Conglomo.Confessions.Indexer
                         currentFileName = string.Empty;
                     }
 
+                    // Allow a data-title attribute
+                    string dataTitle = childNode.GetDataAttribute("title")?.Value ?? string.Empty;
+                    if (!string.IsNullOrWhiteSpace(dataTitle))
+                    {
+                        currentTitle = $"{title}: {dataTitle}";
+                    }
+
                     if (currentEntry.FileName != currentFileName)
                     {
                         if (!string.IsNullOrWhiteSpace(currentEntry.Contents))

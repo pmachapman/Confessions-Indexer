@@ -153,6 +153,10 @@ namespace Conglomo.Confessions.Indexer
             new Synonym { AlternateWord = "withholdeth", PreferredWord = "withholds" },
             new Synonym { AlternateWord = "worketh", PreferredWord = "works" },
             new Synonym { AlternateWord = "woundeth", PreferredWord = "wounds" },
+            new Synonym { AlternateWord = "αἰῶνος", PreferredWord = "aionos" },
+            new Synonym { AlternateWord = "ἐκκλησία", PreferredWord = "ekklesia" },
+            new Synonym { AlternateWord = "ἐξουσιάζω", PreferredWord = "exousiazo" },
+            new Synonym { AlternateWord = "κατεξουσιάζουσιν", PreferredWord = "katexousiazousin" },
             new Synonym { AlternateWord = "Φρόνημα", PreferredWord = "phronema" },
             new Synonym { AlternateWord = "σαρκὸς", PreferredWord = "sarkos" },
         }.AsReadOnly();

@@ -27,6 +27,7 @@ namespace Conglomo.Confessions.Indexer
             new Synonym { AlternateWord = "accounteth", PreferredWord = "accounts" },
             new Synonym { AlternateWord = "acknowledgeth", PreferredWord = "acknowledges" },
             new Synonym { AlternateWord = "acteth", PreferredWord = "acts" },
+            new Synonym { AlternateWord = "André", PreferredWord = "Andre" },
             new Synonym { AlternateWord = "appertaineth", PreferredWord = "appertains" },
             new Synonym { AlternateWord = "applieth", PreferredWord = "applies" },
             new Synonym { AlternateWord = "apprehendeth", PreferredWord = "apprehends" },

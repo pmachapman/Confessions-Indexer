@@ -106,6 +106,13 @@ namespace Conglomo.Confessions.Indexer
                 contents = contents.Replace(synonym.AlternateWord, synonym.PreferredWord);
             }
 
+            // Normalise characters
+            contents = contents
+                .Replace("’", "'", StringComparison.OrdinalIgnoreCase)
+                .Replace("“", "\"", StringComparison.OrdinalIgnoreCase)
+                .Replace("”", "\"", StringComparison.OrdinalIgnoreCase)
+                .Replace("—", " - ", StringComparison.OrdinalIgnoreCase);
+
             // Fix any weirdness
             contents = contents
                 .Replace(" - .", string.Empty, StringComparison.OrdinalIgnoreCase)

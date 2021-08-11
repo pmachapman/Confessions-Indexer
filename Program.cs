@@ -115,7 +115,7 @@ namespace Conglomo.Confessions.Indexer
                             if (parser.Confession != null)
                             {
                                 await context.Confessions.AddAsync(parser.Confession);
-                                await context.SaveChangesAsync();
+                                await context.SaveChangesWithIdentityInsertAsync<Confession>();
                                 confessionId = parser.Confession.Id;
                             }
                             else
@@ -142,7 +142,7 @@ namespace Conglomo.Confessions.Indexer
                             }
 
                             // Save changes to ScriptureIndex
-                            await context.SaveChangesAsync();
+                            await context.SaveChangesWithIdentityInsertAsync<ScriptureIndex>();
 
                             // Update the last identifier
                             id = parser.LastId;
@@ -162,8 +162,8 @@ namespace Conglomo.Confessions.Indexer
                 // Build the full text search index
                 if (configuration.Database == Database.SQLite)
                 {
-                    await context.Database.ExecuteSqlRawAsync("CREATE VIRTUAL TABLE SearchIndexFts USING fts4(content=`SearchIndex`, Contents);");
-                    await context.Database.ExecuteSqlRawAsync("INSERT INTO SearchIndexFts(docid, Contents) SELECT Id, Contents FROM SearchIndex;");
+                    await context.Database.ExecuteSqlRawAsync("CREATE VIRTUAL TABLE SearchIndexFts USING fts4(content=`SearchIndex`, Contents, Title);");
+                    await context.Database.ExecuteSqlRawAsync("INSERT INTO SearchIndexFts(docid, Contents, Title) SELECT Id, Contents, Title FROM SearchIndex;");
                     await context.Database.ExecuteSqlRawAsync("INSERT INTO SearchIndexFts(SearchIndexFts) VALUES ('optimize');");
                     await context.Database.ExecuteSqlRawAsync("VACUUM;");
                 }

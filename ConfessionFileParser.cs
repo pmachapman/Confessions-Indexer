@@ -150,6 +150,7 @@ namespace Conglomo.Confessions.Indexer
                     ScriptureIndex scriptureIndex = new ScriptureIndex
                     {
                         Address = childNode.Attributes["href"].Value,
+                        Id = ++this.LastId,
                         Reference = childNode.InnerText,
                         SearchIndexId = id,
                     };
@@ -220,6 +221,7 @@ namespace Conglomo.Confessions.Indexer
             {
                 Country = articleNode.GetDataAttribute("country").Value,
                 FileName = fileName,
+                Id = ++this.LastId,
                 Title = HttpUtility.HtmlDecode(title),
                 Tradition = articleNode.GetDataAttribute("tradition").Value,
                 Year = Convert.ToInt32(articleNode.GetDataAttribute("year").Value),

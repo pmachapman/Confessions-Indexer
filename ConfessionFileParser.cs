@@ -59,14 +59,6 @@ namespace Conglomo.Confessions.Indexer
         public bool IsValid { get; }
 
         /// <summary>
-        /// Gets the full path to the confession HTML file.
-        /// </summary>
-        /// <value>
-        /// The full path.
-        /// </value>
-        public string FullPath { get; private set; } = string.Empty;
-
-        /// <summary>
         /// Gets the last identifier to be assigned.
         /// </summary>
         /// <value>
@@ -178,9 +170,6 @@ namespace Conglomo.Confessions.Indexer
         /// </returns>
         private bool LoadFile(string path)
         {
-            // Prepare class variables
-            this.FullPath = path;
-
             // Load the document
             string fileName = Path.GetFileName(path);
             HtmlDocument doc = new HtmlDocument();
@@ -252,7 +241,7 @@ namespace Conglomo.Confessions.Indexer
                 {
                     string id = childNode.Attributes["id"].Value;
                     string currentFileName = $"{fileName}#{id}";
-                    if (childNode.Name == "h3" || childNode.Name == "h4" || childNode.Name == "h5")
+                    if (childNode.Name is "h3" or "h4" or "h5")
                     {
                         // Confession Article
                         currentTitle = $"{title}: {childNode.InnerText}";
@@ -305,7 +294,7 @@ namespace Conglomo.Confessions.Indexer
                         };
                     }
                 }
-                else if (childNode.Name == "p" || childNode.Name == "li")
+                else if (childNode.Name is "p" or "li")
                 {
                     // See if we are adding to an existing entry
                     if (!string.IsNullOrWhiteSpace(currentEntry.Contents))

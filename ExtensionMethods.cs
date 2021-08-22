@@ -9,6 +9,7 @@ namespace Conglomo.Confessions.Indexer
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using Microsoft.EntityFrameworkCore;
 
     /// <summary>
@@ -30,6 +31,14 @@ namespace Conglomo.Confessions.Indexer
             {
                 optionsBuilder.UseSqlServer(configuration.ConnectionString);
             }
+            else if (configuration.Database == Database.MySQL)
+            {
+                optionsBuilder.UseMySql(configuration.ConnectionString, MySqlServerVersion.LatestSupportedServerVersion);
+            }
+            else if (configuration.Database == Database.MariaDB)
+            {
+                optionsBuilder.UseMySql(configuration.ConnectionString, MariaDbServerVersion.LatestSupportedServerVersion);
+            }
             else
             {
                 optionsBuilder.UseSqlite(configuration.ConnectionString);
@@ -48,19 +57,7 @@ namespace Conglomo.Confessions.Indexer
         ///   <c>true</c> if the value parameter matches the end of this string; otherwise, <c>false</c>.
         /// </returns>
         public static bool EndsWith(this string instance, IEnumerable<string> values, StringComparison comparisonType)
-        {
-            // Check each value against the instance
-            foreach (string value in values)
-            {
-                if (instance.EndsWith(value, comparisonType))
-                {
-                    return true;
-                }
-            }
-
-            // Default to false
-            return false;
-        }
+            => values.Any(value => instance.EndsWith(value, comparisonType));
 
         /// <summary>
         /// Returns <c>true</c> if the path is a confession file.
@@ -134,9 +131,7 @@ namespace Conglomo.Confessions.Indexer
                 catch (Exception ex)
                 {
                     // Ignore errors
-                    if (!(ex is ArgumentException
-                          || ex is ArgumentNullException
-                          || ex is InvalidOperationException))
+                    if (ex is not (ArgumentException or ArgumentNullException or InvalidOperationException))
                     {
                         throw;
                     }

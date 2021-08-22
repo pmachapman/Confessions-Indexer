@@ -25,5 +25,15 @@ namespace Conglomo.Confessions.Indexer
         /// The Microsoft SQL Server database.
         /// </summary>
         MSSQL = 2,
+
+        /// <summary>
+        /// The MySQL database.
+        /// </summary>
+        MySQL = 3,
+
+        /// <summary>
+        /// The MariaDB database.
+        /// </summary>
+        MariaDB = 4,
     }
 }

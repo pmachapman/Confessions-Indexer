@@ -21,7 +21,7 @@ namespace Conglomo.Confessions.Indexer
         /// </summary>
         static Log()
         {
-            string testAssemblyName = "Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter";
+            const string testAssemblyName = "Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter";
             IsInUnitTest = AppDomain.CurrentDomain.GetAssemblies()
                 .Any(a => a.FullName?.StartsWith(testAssemblyName, StringComparison.OrdinalIgnoreCase) ?? false);
         }

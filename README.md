@@ -5,6 +5,8 @@ An application for generating the full text search database for Conglomo's Creed
 
 * SQLite
 * Microsoft SQL Server
+* MySQL
+* MariaDB
 
 ## Usage
 
@@ -22,5 +24,9 @@ An application for generating the full text search database for Conglomo's Creed
 `INDEX MSSQL "Data Source=(LocalDb)\\MSSQLLocalDB;Initial Catalog=Confessions;Integrated Security=SSPI;MultipleActiveResultSets=true;"`
 
 `INDEX SQLite "Data Source=C:\Confessions\confessions.db" "C:\Confessions"`
+
+`INDEX MariaDB "C:\Confessions" "Server=localhost;Database=confessions;User=root;Password=;"`
+
+`INDEX MySQL "Server=localhost;Database=confessions;User=root;Password=;"`
 
 `INDEX "Data Source=D:\confessions.db"`

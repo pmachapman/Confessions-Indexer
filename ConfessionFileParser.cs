@@ -244,7 +244,7 @@ namespace Conglomo.Confessions.Indexer
                     if (childNode.Name is "h3" or "h4" or "h5")
                     {
                         // Confession Article
-                        currentTitle = $"{title}: {childNode.InnerText}";
+                        currentTitle = $"{title}: {childNode.GetDirectInnerText()}";
                     }
                     else if (childNode.Name == "li")
                     {
@@ -296,6 +296,12 @@ namespace Conglomo.Confessions.Indexer
                 }
                 else if (childNode.Name is "p" or "li")
                 {
+                    // Check for noindex
+                    if (childNode.Attributes["class"]?.Value?.Contains("noindex", StringComparison.OrdinalIgnoreCase) ?? false)
+                    {
+                        continue;
+                    }
+
                     // See if we are adding to an existing entry
                     if (!string.IsNullOrWhiteSpace(currentEntry.Contents))
                     {

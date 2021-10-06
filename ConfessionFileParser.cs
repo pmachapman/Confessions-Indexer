@@ -311,8 +311,26 @@ namespace Conglomo.Confessions.Indexer
                     // Remove bold and italic tags
                     childNode.InnerHtml = childNode.InnerHtml.RemoveFormattingTags();
 
-                    // Get the contents
-                    currentEntry.Contents += ProcessContents(childNode.GetDirectInnerText());
+                    // See if this tag contains a list
+                    if (childNode.Name == "li" && childNode.ChildNodes.Any(n => n.Name is "ul" or "ol"))
+                    {
+                        // Get the contents of the text
+                        currentEntry.Contents += ProcessContents(childNode.GetDirectInnerText());
+
+                        // Get the contents of the list
+                        foreach (HtmlNode childListNode in childNode.ChildNodes.Where(n => n.Name is "ul" or "ol"))
+                        {
+                            foreach (HtmlNode childListNodeItem in childListNode.ChildNodes.Where(n => n.Name == "li"))
+                            {
+                                currentEntry.Contents += (" " + ProcessContents(childListNodeItem.GetDirectInnerText())).Trim();
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Get the contents of the text
+                        currentEntry.Contents += ProcessContents(childNode.GetDirectInnerText());
+                    }
 
                     // Get the scripture references for the article
                     this.ProcessScriptureReferences(currentEntry.Id, childNode);

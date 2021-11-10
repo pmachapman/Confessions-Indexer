@@ -4,30 +4,29 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace Conglomo.Confessions.Indexer
+namespace Conglomo.Confessions.Indexer;
+
+/// <summary>
+/// A synonym.
+/// </summary>
+public record Synonym : IIdentifiable
 {
     /// <summary>
-    /// A synonym.
+    /// Gets or sets the alternate word.
     /// </summary>
-    public record Synonym : IIdentifiable
-    {
-        /// <summary>
-        /// Gets or sets the alternate word.
-        /// </summary>
-        /// <value>
-        /// The alternate word.
-        /// </value>
-        public string AlternateWord { get; set; } = string.Empty;
+    /// <value>
+    /// The alternate word.
+    /// </value>
+    public string AlternateWord { get; set; } = string.Empty;
 
-        /// <inheritdoc/>
-        public long Id { get; set; }
+    /// <inheritdoc/>
+    public long Id { get; set; }
 
-        /// <summary>
-        /// Gets or sets the preferred word.
-        /// </summary>
-        /// <value>
-        /// The preferred word.
-        /// </value>
-        public string PreferredWord { get; set; } = string.Empty;
-    }
+    /// <summary>
+    /// Gets or sets the preferred word.
+    /// </summary>
+    /// <value>
+    /// The preferred word.
+    /// </value>
+    public string PreferredWord { get; set; } = string.Empty;
 }

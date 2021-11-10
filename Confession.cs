@@ -4,65 +4,64 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace Conglomo.Confessions.Indexer
+namespace Conglomo.Confessions.Indexer;
+
+using System.Collections.Generic;
+
+/// <summary>
+/// A Christian Creed or Confession.
+/// </summary>
+/// <seealso cref="Conglomo.Confessions.Indexer.IIdentifiable" />
+public class Confession : IIdentifiable
 {
-    using System.Collections.Generic;
+    /// <summary>
+    /// Gets or sets the country.
+    /// </summary>
+    /// <value>
+    /// The country.
+    /// </value>
+    public string Country { get; set; } = string.Empty;
 
     /// <summary>
-    /// A Christian Creed or Confession.
+    /// Gets or sets the name of the file.
     /// </summary>
-    /// <seealso cref="Conglomo.Confessions.Indexer.IIdentifiable" />
-    public class Confession : IIdentifiable
-    {
-        /// <summary>
-        /// Gets or sets the country.
-        /// </summary>
-        /// <value>
-        /// The country.
-        /// </value>
-        public string Country { get; set; } = string.Empty;
+    /// <value>
+    /// The name of the file.
+    /// </value>
+    public string FileName { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the name of the file.
-        /// </summary>
-        /// <value>
-        /// The name of the file.
-        /// </value>
-        public string FileName { get; set; } = string.Empty;
+    /// <inheritdoc/>
+    public long Id { get; set; }
 
-        /// <inheritdoc/>
-        public long Id { get; set; }
+    /// <summary>
+    /// Gets the search indices for this confession.
+    /// </summary>
+    /// <value>
+    /// The search indices.
+    /// </value>
+    public virtual ICollection<SearchIndex> SearchIndex { get; } = new HashSet<SearchIndex>();
 
-        /// <summary>
-        /// Gets the search indices for this confession.
-        /// </summary>
-        /// <value>
-        /// The search indices.
-        /// </value>
-        public virtual ICollection<SearchIndex> SearchIndex { get; } = new HashSet<SearchIndex>();
+    /// <summary>
+    /// Gets or sets the title.
+    /// </summary>
+    /// <value>
+    /// The title.
+    /// </value>
+    public string Title { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the title.
-        /// </summary>
-        /// <value>
-        /// The title.
-        /// </value>
-        public string Title { get; set; } = string.Empty;
+    /// <summary>
+    /// Gets or sets the tradition.
+    /// </summary>
+    /// <value>
+    /// The tradition.
+    /// </value>
+    public string Tradition { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the tradition.
-        /// </summary>
-        /// <value>
-        /// The tradition.
-        /// </value>
-        public string Tradition { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Gets or sets the year.
-        /// </summary>
-        /// <value>
-        /// The year.
-        /// </value>
-        public int Year { get; set; }
-    }
+    /// <summary>
+    /// Gets or sets the year.
+    /// </summary>
+    /// <value>
+    /// The year.
+    /// </value>
+    public int Year { get; set; }
 }

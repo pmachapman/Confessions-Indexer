@@ -4,19 +4,18 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace Conglomo.Confessions.Indexer
+namespace Conglomo.Confessions.Indexer;
+
+/// <summary>
+/// An interface for an object that is identifiable by an id.
+/// </summary>
+public interface IIdentifiable
 {
     /// <summary>
-    /// An interface for an object that is identifiable by an id.
+    /// Gets or sets the identifier.
     /// </summary>
-    public interface IIdentifiable
-    {
-        /// <summary>
-        /// Gets or sets the identifier.
-        /// </summary>
-        /// <value>
-        /// The identifier.
-        /// </value>
-        long Id { get; set; }
-    }
+    /// <value>
+    /// The identifier.
+    /// </value>
+    long Id { get; set; }
 }

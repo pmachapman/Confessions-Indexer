@@ -4,23 +4,23 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace Conglomo.Confessions.Indexer
-{
-    using System.Collections.Generic;
-    using System.Collections.ObjectModel;
+namespace Conglomo.Confessions.Indexer;
 
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+
+/// <summary>
+/// The synonyms.
+/// </summary>
+public static class Synonyms
+{
     /// <summary>
-    /// The synonyms.
+    /// All synonyms.
     /// </summary>
-    public static class Synonyms
-    {
-        /// <summary>
-        /// All synonyms.
-        /// </summary>
-        /// <remarks>
-        /// These are case sensitive.
-        /// </remarks>
-        public static readonly ReadOnlyCollection<Synonym> All = new List<Synonym>
+    /// <remarks>
+    /// These are case sensitive.
+    /// </remarks>
+    public static readonly ReadOnlyCollection<Synonym> All = new List<Synonym>
         {
             new Synonym { AlternateWord = "abideth", PreferredWord = "abides" },
             new Synonym { AlternateWord = "accepteth", PreferredWord = "accepts" },
@@ -161,5 +161,4 @@ namespace Conglomo.Confessions.Indexer
             new Synonym { AlternateWord = "Φρόνημα", PreferredWord = "phronema" },
             new Synonym { AlternateWord = "σαρκὸς", PreferredWord = "sarkos" },
         }.AsReadOnly();
-    }
 }

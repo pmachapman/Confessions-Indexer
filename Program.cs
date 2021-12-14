@@ -25,11 +25,11 @@ public static class Program
     /// The file names to ignore.
     /// </summary>
     private static readonly string[] FileNamesToIgnore =
-        {
-                "index.html",
-                "privacy.html",
-                "terms.html",
-        };
+    {
+        "index.html",
+        "privacy.html",
+        "terms.html",
+    };
 
     /// <summary>
     /// Defines the entry point of the application.

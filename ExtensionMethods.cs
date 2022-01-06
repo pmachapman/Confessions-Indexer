@@ -1,6 +1,6 @@
 ﻿// -----------------------------------------------------------------------
 // <copyright file="ExtensionMethods.cs" company="Conglomo">
-// Copyright 2021 Conglomo Limited. All rights reserved.
+// Copyright 2021-2022 Conglomo Limited. Please see LICENSE.md for license details.
 // </copyright>
 // -----------------------------------------------------------------------
 

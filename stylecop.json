@@ -9,7 +9,7 @@
   "settings": {
     "documentationRules": {
       "companyName": "Conglomo",
-      "copyrightText": "Copyright 2021 Conglomo Limited. All rights reserved.",
+      "copyrightText": "Copyright 2021-2022 Conglomo Limited. Please see LICENSE.md for license details.",
       "documentationCulture": "en-GB"
     },
     "layoutRules": {

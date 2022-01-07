@@ -252,7 +252,15 @@ internal class ConfessionFileParser
                     string questionNumber = new string(id.Where(char.IsDigit).ToArray());
                     if (!string.IsNullOrWhiteSpace(questionNumber))
                     {
-                        currentTitle = $"{title}: Question & Answer {questionNumber}";
+                        if (title.Contains("Articles", StringComparison.OrdinalIgnoreCase))
+                        {
+                            // This is for the Lambeth Articles
+                            currentTitle = $"{title}: Article {questionNumber}";
+                        }
+                        else
+                        {
+                            currentTitle = $"{title}: Question & Answer {questionNumber}";
+                        }
                     }
 
                     // Remove bold and italic tags, and any basic tables

@@ -79,3 +79,6 @@ csharp_preferred_modifier_order = public,internal,protected,private,static,reado
 dotnet_style_qualification_for_method = true:suggestion
 #prefer properties to be prefaced with this. in C# or Me. in Visual Basic
 dotnet_style_qualification_for_property = true:suggestion
+
+# IDE0003: Remove qualification
+dotnet_style_qualification_for_field = true

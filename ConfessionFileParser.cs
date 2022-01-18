@@ -103,6 +103,7 @@ internal class ConfessionFileParser
             .Replace("’", "'", StringComparison.OrdinalIgnoreCase)
             .Replace("“", "\"", StringComparison.OrdinalIgnoreCase)
             .Replace("”", "\"", StringComparison.OrdinalIgnoreCase)
+            .Replace(" — ", " - ", StringComparison.OrdinalIgnoreCase)
             .Replace("—", " - ", StringComparison.OrdinalIgnoreCase);
 
         // Fix any weirdness
@@ -244,7 +245,13 @@ internal class ConfessionFileParser
                 if (childNode.Name is "h3" or "h4" or "h5")
                 {
                     // Confession Article
-                    currentTitle = $"{title}: {childNode.GetDirectInnerText()}";
+                    string articleName = childNode
+                        .GetDirectInnerText()
+                        .TrimStart('[') // Strip brackets from the Auburn Declaration
+                        .TrimEnd(']');
+
+                    // Set the current title
+                    currentTitle = $"{title}: {articleName}";
                 }
                 else if (childNode.Name == "li")
                 {

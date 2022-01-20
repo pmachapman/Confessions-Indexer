@@ -109,6 +109,8 @@ internal class ConfessionFileParser
         // Fix any weirdness
         contents = contents
             .Replace(" - .", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace(" []", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace(" [; ]", string.Empty, StringComparison.OrdinalIgnoreCase)
             .Replace(" ().", ".", StringComparison.OrdinalIgnoreCase)
             .Replace(" ()", string.Empty, StringComparison.OrdinalIgnoreCase)
             .Replace("(; ).", ".", StringComparison.OrdinalIgnoreCase)
@@ -309,7 +311,7 @@ internal class ConfessionFileParser
                     };
                 }
             }
-            else if (childNode.Name is "p" or "li")
+            else if (childNode.Name is "p" or "li" or "h4" or "h5")
             {
                 // Check for noindex
                 if (childNode.Attributes["class"]?.Value?.Contains("noindex", StringComparison.OrdinalIgnoreCase) ?? false)

@@ -223,9 +223,14 @@ internal class ConfessionFileParser
         List<HtmlNode> childNodes = articleNode.ChildNodes.ToList();
         for (int i = 0; i < childNodes.Count; i++)
         {
-            // Add li nodes right after the ol to keep order
             if (childNodes[i].Name == "ol")
             {
+                // Add li nodes right after the ol to keep order
+                childNodes.InsertRange(i + 1, childNodes[i].ChildNodes);
+            }
+            else if (childNodes[i].Name == "blockquote")
+            {
+                // Add contents of blockquote notes right after the blockquote
                 childNodes.InsertRange(i + 1, childNodes[i].ChildNodes);
             }
         }
@@ -261,7 +266,8 @@ internal class ConfessionFileParser
                     string questionNumber = new string(id.Where(char.IsDigit).ToArray());
                     if (!string.IsNullOrWhiteSpace(questionNumber))
                     {
-                        if (title.Contains("Articles", StringComparison.OrdinalIgnoreCase))
+                        if (title.Contains("Articles", StringComparison.OrdinalIgnoreCase)
+                            || title.Contains("Confession", StringComparison.OrdinalIgnoreCase))
                         {
                             // This is for the Lambeth Articles
                             currentTitle = $"{title}: Article {questionNumber}";

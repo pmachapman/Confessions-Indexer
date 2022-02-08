@@ -295,7 +295,7 @@ internal class ConfessionFileParser
 
                     // Set the file name and title
                     currentEntry.FileName = currentFileName;
-                    currentEntry.Title = currentTitle;
+                    currentEntry.Title = HttpUtility.HtmlDecode(currentTitle);
 
                     // Reset the filename
                     currentFileName = string.Empty;

@@ -281,6 +281,12 @@ internal class ConfessionFileParser
                     // Remove bold and italic tags, and any basic tables
                     childNode.InnerHtml = childNode.InnerHtml.RemoveFormattingTags();
 
+                    // See if we are adding to an existing entry
+                    if (!string.IsNullOrWhiteSpace(currentEntry.Contents))
+                    {
+                        currentEntry.Contents += " ";
+                    }
+
                     // Get the catechism question and answer
                     currentEntry.Contents += ProcessContents(childNode.GetDirectInnerText());
 

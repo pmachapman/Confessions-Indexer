@@ -28,6 +28,7 @@ public static class Program
     {
         "index.html",
         "privacy.html",
+        "support.html",
         "terms.html",
     };
 

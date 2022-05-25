@@ -190,7 +190,7 @@ public class DataContext : DbContext
             .HasIndex(s => s.SearchIndexId);
         modelBuilder.Entity<ScriptureIndex>()
             .HasOne(s => s.SearchIndex)
-            .WithMany(i => i!.ScriptureIndex)
+            .WithMany(i => i.ScriptureIndex)
             .HasForeignKey(s => s.SearchIndexId);
         modelBuilder.Entity<SearchIndex>()
             .HasKey(s => s.Id);
@@ -198,7 +198,7 @@ public class DataContext : DbContext
             .HasIndex(s => s.ConfessionId);
         modelBuilder.Entity<SearchIndex>()
             .HasOne(s => s.Confession)
-            .WithMany(c => c!.SearchIndex)
+            .WithMany(c => c.SearchIndex)
             .HasForeignKey(s => s.ConfessionId);
         modelBuilder.Entity<Synonym>()
             .HasKey(s => s.Id);

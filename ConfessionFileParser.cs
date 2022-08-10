@@ -32,7 +32,7 @@ internal class ConfessionFileParser
     private readonly List<SearchIndex> searchIndexEntries = new List<SearchIndex>();
 
     /// <summary>
-    /// Initialises a new instance of the <see cref="ConfessionFileParser" /> class.
+    /// Initializes a new instance of the <see cref="ConfessionFileParser" /> class.
     /// </summary>
     /// <param name="path">The full path to the confession HTML file.</param>
     /// <param name="id">The identifier to start from.</param>

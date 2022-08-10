@@ -17,7 +17,7 @@ using System.Linq;
 internal static class Log
 {
     /// <summary>
-    /// Initialises static members of the <see cref="Log"/> class.
+    /// Initializes static members of the <see cref="Log"/> class.
     /// </summary>
     static Log()
     {

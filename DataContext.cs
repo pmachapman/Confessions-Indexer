@@ -21,7 +21,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 public class DataContext : DbContext
 {
     /// <summary>
-    /// Initialises a new instance of the <see cref="DataContext"/> class.
+    /// Initializes a new instance of the <see cref="DataContext"/> class.
     /// </summary>
     /// <param name="options">The options.</param>
     public DataContext(DbContextOptions<DataContext> options)

@@ -27,21 +27,22 @@ public static class ExtensionMethods
         where T : DbContext
     {
         var optionsBuilder = new DbContextOptionsBuilder<T>();
-        if (configuration.Database == Database.MSSQL)
+        switch (configuration.Database)
         {
-            optionsBuilder.UseSqlServer(configuration.ConnectionString);
-        }
-        else if (configuration.Database == Database.MySQL)
-        {
-            optionsBuilder.UseMySql(configuration.ConnectionString, MySqlServerVersion.LatestSupportedServerVersion);
-        }
-        else if (configuration.Database == Database.MariaDB)
-        {
-            optionsBuilder.UseMySql(configuration.ConnectionString, MariaDbServerVersion.LatestSupportedServerVersion);
-        }
-        else
-        {
-            optionsBuilder.UseSqlite(configuration.ConnectionString);
+            case Database.MSSQL:
+                optionsBuilder.UseSqlServer(configuration.ConnectionString);
+                break;
+            case Database.MySQL:
+                optionsBuilder.UseMySql(configuration.ConnectionString, MySqlServerVersion.LatestSupportedServerVersion);
+                break;
+            case Database.MariaDB:
+                optionsBuilder.UseMySql(configuration.ConnectionString, MariaDbServerVersion.LatestSupportedServerVersion);
+                break;
+            case Database.None:
+            case Database.SQLite:
+            default:
+                optionsBuilder.UseSqlite(configuration.ConnectionString);
+                break;
         }
 
         return optionsBuilder.Options;

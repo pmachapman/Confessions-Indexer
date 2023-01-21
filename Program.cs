@@ -1,6 +1,6 @@
 ﻿// -----------------------------------------------------------------------
 // <copyright file="Program.cs" company="Conglomo">
-// Copyright 2021-2022 Conglomo Limited. Please see LICENSE.md for license details.
+// Copyright 2021-2023 Conglomo Limited. Please see LICENSE.md for license details.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -64,15 +64,9 @@ public static class Program
         }
 
         // Get the file names
-        string[] fileNames;
-        if (configuration.Path.IsFile())
-        {
-            fileNames = new[] { configuration.Path };
-        }
-        else
-        {
-            fileNames = Directory.GetFiles(configuration.Path, "*.html");
-        }
+        string[] fileNames = configuration.Path.IsFile()
+            ? new[] { configuration.Path } :
+            Directory.GetFiles(configuration.Path, "*.html");
 
         // If we are using SQLite in-memory, we need to keep the connection open
         SqliteConnection? keepAliveConnection = null;
@@ -120,7 +114,7 @@ public static class Program
 
                 // Create the confession record
                 long confessionId;
-                if (parser.Confession != null)
+                if (parser.Confession is not null)
                 {
                     await context.Confessions.AddAsync(parser.Confession);
                     await context.SaveChangesWithIdentityInsertAsync<Confession>();
@@ -175,7 +169,7 @@ public static class Program
         finally
         {
             // Dispose the keep alive connection, if it exists
-            if (keepAliveConnection != null)
+            if (keepAliveConnection is not null)
             {
                 await keepAliveConnection.DisposeAsync();
             }
@@ -189,27 +183,29 @@ public static class Program
     private static void ShowAbout(bool copyrightOnly = false)
     {
         Assembly? assembly = Assembly.GetEntryAssembly();
-        if (assembly != null)
+        if (assembly is null)
         {
-            // Display the product name
-            object[] attributes = assembly.GetCustomAttributes(typeof(AssemblyProductAttribute), false);
-            if (!copyrightOnly && attributes.Any())
-            {
-                Console.WriteLine(((AssemblyProductAttribute)attributes.First()).Product);
-            }
+            return;
+        }
 
-            // Display the copyright message
-            attributes = assembly.GetCustomAttributes(typeof(AssemblyCopyrightAttribute), false);
-            if (attributes.Any())
-            {
-                Console.WriteLine(((AssemblyCopyrightAttribute)attributes.First()).Copyright);
-            }
+        // Display the product name
+        object[] attributes = assembly.GetCustomAttributes(typeof(AssemblyProductAttribute), false);
+        if (!copyrightOnly && attributes.Any())
+        {
+            Console.WriteLine(((AssemblyProductAttribute)attributes.First()).Product);
+        }
 
-            // Display the help message
-            if (!copyrightOnly)
-            {
-                Console.WriteLine(Properties.Resources.HelpMessage);
-            }
+        // Display the copyright message
+        attributes = assembly.GetCustomAttributes(typeof(AssemblyCopyrightAttribute), false);
+        if (attributes.Any())
+        {
+            Console.WriteLine(((AssemblyCopyrightAttribute)attributes.First()).Copyright);
+        }
+
+        // Display the help message
+        if (!copyrightOnly)
+        {
+            Console.WriteLine(Properties.Resources.HelpMessage);
         }
     }
 }

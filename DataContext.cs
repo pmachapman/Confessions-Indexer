@@ -1,6 +1,6 @@
 ﻿// -----------------------------------------------------------------------
 // <copyright file="DataContext.cs" company="Conglomo">
-// Copyright 2021-2022 Conglomo Limited. Please see LICENSE.md for license details.
+// Copyright 2021-2023 Conglomo Limited. Please see LICENSE.md for license details.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -79,21 +79,9 @@ public class DataContext : DbContext
     /// </returns>
     public async Task DropTablesAsync(string? tableName = null, CancellationToken cancellationToken = default)
     {
-        List<DatabaseTable> databaseTables;
-        if (string.IsNullOrWhiteSpace(tableName))
-        {
-            databaseTables = this.DatabaseTables.AsNoTracking().ToList();
-        }
-        else
-        {
-            databaseTables = new List<DatabaseTable>
-                {
-                    new DatabaseTable
-                    {
-                        TableName = tableName,
-                    },
-                };
-        }
+        List<DatabaseTable> databaseTables = string.IsNullOrWhiteSpace(tableName)
+            ? this.DatabaseTables.AsNoTracking().ToList()
+            : new List<DatabaseTable> { new DatabaseTable { TableName = tableName } };
 
         foreach (DatabaseTable databaseTable in databaseTables)
         {
@@ -153,26 +141,18 @@ public class DataContext : DbContext
 
             return returnValue;
         }
-        else
-        {
-            // SQLite doesn't require identity insert
-            return await this.SaveChangesAsync(cancellationToken).ConfigureAwait(true);
-        }
+
+        // SQLite doesn't require identity insert
+        return await this.SaveChangesAsync(cancellationToken).ConfigureAwait(true);
     }
 
     /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // EF Core creates that table anyway, so lets just ensure it is singular so we can drop it
-        string query;
-        if (this.Database.IsSqlServer())
-        {
-            query = "SELECT TABLE_NAME AS TABLENAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME NOT LIKE '%Migration%' AND TABLE_NAME <> 'sysdiagrams' ORDER BY TABLE_NAME";
-        }
-        else
-        {
-            query = "SELECT name AS TABLENAME FROM sqlite_master WHERE type = 'table' ORDER BY name;";
-        }
+        string query = this.Database.IsSqlServer()
+            ? "SELECT TABLE_NAME AS TABLENAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME NOT LIKE '%Migration%' AND TABLE_NAME <> 'sysdiagrams' ORDER BY TABLE_NAME"
+            : "SELECT name AS TABLENAME FROM sqlite_master WHERE type = 'table' ORDER BY name;";
 
         modelBuilder.Entity<DatabaseTable>()
             .ToSqlQuery(query)

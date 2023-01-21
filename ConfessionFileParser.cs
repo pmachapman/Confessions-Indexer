@@ -1,6 +1,6 @@
 ﻿// -----------------------------------------------------------------------
 // <copyright file="ConfessionFileParser.cs" company="Conglomo">
-// Copyright 2021-2022 Conglomo Limited. Please see LICENSE.md for license details.
+// Copyright 2021-2023 Conglomo Limited. Please see LICENSE.md for license details.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -19,7 +19,7 @@ using HtmlAgilityPack;
 /// <summary>
 /// The Creed/Confession HTML File Parser.
 /// </summary>
-internal class ConfessionFileParser
+internal partial class ConfessionFileParser
 {
     /// <summary>
     /// The scripture index entries.
@@ -90,7 +90,7 @@ internal class ConfessionFileParser
     private static string ProcessContents(string contents)
     {
         // Get the contents as text, outside of the tags
-        contents = Regex.Replace(HttpUtility.HtmlDecode(contents), @"\s+", " ").Trim();
+        contents = OneOrMoreSpacesRegex().Replace(HttpUtility.HtmlDecode(contents), " ").Trim();
 
         // Replace synonyms
         foreach (Synonym synonym in Synonyms.All)
@@ -122,6 +122,13 @@ internal class ConfessionFileParser
         // Return the contents
         return contents;
     }
+
+    /// <summary>
+    /// The one or more spaces regular expression.
+    /// </summary>
+    /// <returns>The regular expression to find one or more spaces.</returns>
+    [GeneratedRegex(@"\s+", RegexOptions.Compiled)]
+    private static partial Regex OneOrMoreSpacesRegex();
 
     /// <summary>
     /// Processes the scripture references.
@@ -188,23 +195,20 @@ internal class ConfessionFileParser
         }
 
         // Get the title
-        string title;
         HtmlNode? titleNode = doc.DocumentNode.SelectSingleNode("//title");
-        if (titleNode == null)
+        if (titleNode is null)
         {
-            Log.Warning($"Element $('title') not found.");
+            Log.Warning("Element $('title') not found.");
             return false;
         }
-        else
-        {
-            title = titleNode.InnerText;
-        }
+
+        string title = titleNode.InnerText;
 
         // Get the content node
         HtmlNode? articleNode = doc.DocumentNode.SelectSingleNode("//article[@id=\"main\"]");
-        if (articleNode == null)
+        if (articleNode is null)
         {
-            Log.Warning($"Element $('article#main') not found.");
+            Log.Warning("Element $('article#main') not found.");
             return false;
         }
 
@@ -223,14 +227,10 @@ internal class ConfessionFileParser
         List<HtmlNode> childNodes = articleNode.ChildNodes.ToList();
         for (int i = 0; i < childNodes.Count; i++)
         {
-            if (childNodes[i].Name == "ol")
+            if (childNodes[i].Name is "ol" or "blockquote")
             {
                 // Add li nodes right after the ol to keep order
-                childNodes.InsertRange(i + 1, childNodes[i].ChildNodes);
-            }
-            else if (childNodes[i].Name == "blockquote")
-            {
-                // Add contents of blockquote notes right after the blockquote
+                // or the contents of blockquote notes right after the blockquote
                 childNodes.InsertRange(i + 1, childNodes[i].ChildNodes);
             }
         }
@@ -266,16 +266,11 @@ internal class ConfessionFileParser
                     string questionNumber = new string(id.Where(char.IsDigit).ToArray());
                     if (!string.IsNullOrWhiteSpace(questionNumber))
                     {
-                        if (title.Contains("Articles", StringComparison.OrdinalIgnoreCase)
-                            || title.Contains("Confession", StringComparison.OrdinalIgnoreCase))
-                        {
-                            // This is for the Lambeth Articles
-                            currentTitle = $"{title}: Article {questionNumber}";
-                        }
-                        else
-                        {
-                            currentTitle = $"{title}: Question & Answer {questionNumber}";
-                        }
+                        // This is for the Lambeth Articles
+                        currentTitle = title.Contains("Articles", StringComparison.OrdinalIgnoreCase)
+                                       || title.Contains("Confession", StringComparison.OrdinalIgnoreCase)
+                            ? $"{title}: Article {questionNumber}"
+                            : $"{title}: Question & Answer {questionNumber}";
                     }
 
                     // Remove bold and italic tags, and any basic tables

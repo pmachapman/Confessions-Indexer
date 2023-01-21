@@ -1,6 +1,6 @@
 ﻿// -----------------------------------------------------------------------
 // <copyright file="Log.cs" company="Conglomo">
-// Copyright 2021-2022 Conglomo Limited. Please see LICENSE.md for license details.
+// Copyright 2021-2023 Conglomo Limited. Please see LICENSE.md for license details.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -37,7 +37,7 @@ internal static class Log
 #if DEBUG
         get => true;
 #else
-            get => false;
+        get => false;
 #endif
     }
 
@@ -55,16 +55,18 @@ internal static class Log
     /// <param name="message">The message.</param>
     public static void Error([Localizable(false)] string? message)
     {
-        if (message != null)
+        if (message is null)
         {
-            if (IsInUnitTest)
-            {
-                Trace.WriteLine(message);
-            }
-            else
-            {
-                Console.WriteLine(message);
-            }
+            return;
+        }
+
+        if (IsInUnitTest)
+        {
+            Trace.WriteLine(message);
+        }
+        else
+        {
+            Console.WriteLine(message);
         }
     }
 
@@ -80,16 +82,18 @@ internal static class Log
     /// <param name="message">The message.</param>
     public static void Info([Localizable(false)] string? message)
     {
-        if (message != null)
+        if (message is null)
         {
-            if (!IsDebug || IsInUnitTest)
-            {
-                Trace.WriteLine(message);
-            }
-            else
-            {
-                Console.WriteLine(message);
-            }
+            return;
+        }
+
+        if (!IsDebug || IsInUnitTest)
+        {
+            Trace.WriteLine(message);
+        }
+        else
+        {
+            Console.WriteLine(message);
         }
     }
 
@@ -99,16 +103,18 @@ internal static class Log
     /// <param name="message">The message.</param>
     public static void Warning([Localizable(false)] string? message)
     {
-        if (message != null)
+        if (message is null)
         {
-            if (IsInUnitTest)
-            {
-                Trace.WriteLine(message);
-            }
-            else
-            {
-                Console.WriteLine(message);
-            }
+            return;
+        }
+
+        if (IsInUnitTest)
+        {
+            Trace.WriteLine(message);
+        }
+        else
+        {
+            Console.WriteLine(message);
         }
     }
 }

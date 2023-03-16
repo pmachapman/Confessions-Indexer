@@ -42,6 +42,14 @@ public class Confession : IIdentifiable
     public virtual ICollection<SearchIndex> SearchIndex { get; } = new HashSet<SearchIndex>();
 
     /// <summary>
+    /// Gets or sets a value indicating whether this confession supports quiz mode.
+    /// </summary>
+    /// <value>
+    ///   <c>true</c> if quiz mode is supported; otherwise, <c>false</c>.
+    /// </value>
+    public bool Quiz { get; set; }
+
+    /// <summary>
     /// Gets or sets the title.
     /// </summary>
     /// <value>

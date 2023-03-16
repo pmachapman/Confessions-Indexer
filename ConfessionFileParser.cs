@@ -218,6 +218,7 @@ internal partial class ConfessionFileParser
             Country = articleNode.GetDataAttribute("country").Value,
             FileName = fileName,
             Id = ++this.LastId,
+            Quiz = articleNode.GetDataAttribute("quiz")?.Value.ToLowerInvariant() == "true",
             Title = HttpUtility.HtmlDecode(title),
             Tradition = articleNode.GetDataAttribute("tradition").Value,
             Year = Convert.ToInt32(articleNode.GetDataAttribute("year").Value),

@@ -1,6 +1,6 @@
 ﻿// -----------------------------------------------------------------------
 // <copyright file="Program.cs" company="Conglomo">
-// Copyright 2021-2023 Conglomo Limited. Please see LICENSE.md for license details.
+// Copyright 2021-2024 Conglomo Limited. Please see LICENSE.md for license details.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -25,12 +25,12 @@ public static class Program
     /// The file names to ignore.
     /// </summary>
     private static readonly string[] FileNamesToIgnore =
-    {
+    [
         "index.html",
         "privacy.html",
         "support.html",
         "terms.html",
-    };
+    ];
 
     /// <summary>
     /// Defines the entry point of the application.
@@ -65,7 +65,7 @@ public static class Program
 
         // Get the file names
         string[] fileNames = configuration.Path.IsFile()
-            ? new[] { configuration.Path } :
+            ? [configuration.Path] :
             Directory.GetFiles(configuration.Path, "*.html");
 
         // If we are using SQLite in-memory, we need to keep the connection open
@@ -190,14 +190,14 @@ public static class Program
 
         // Display the product name
         object[] attributes = assembly.GetCustomAttributes(typeof(AssemblyProductAttribute), false);
-        if (!copyrightOnly && attributes.Any())
+        if (!copyrightOnly && attributes.Length > 0)
         {
             Console.WriteLine(((AssemblyProductAttribute)attributes.First()).Product);
         }
 
         // Display the copyright message
         attributes = assembly.GetCustomAttributes(typeof(AssemblyCopyrightAttribute), false);
-        if (attributes.Any())
+        if (attributes.Length > 0)
         {
             Console.WriteLine(((AssemblyCopyrightAttribute)attributes.First()).Copyright);
         }

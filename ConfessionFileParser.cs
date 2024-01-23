@@ -1,6 +1,6 @@
 ﻿// -----------------------------------------------------------------------
 // <copyright file="ConfessionFileParser.cs" company="Conglomo">
-// Copyright 2021-2023 Conglomo Limited. Please see LICENSE.md for license details.
+// Copyright 2021-2024 Conglomo Limited. Please see LICENSE.md for license details.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -24,12 +24,12 @@ internal partial class ConfessionFileParser
     /// <summary>
     /// The scripture index entries.
     /// </summary>
-    private readonly List<ScriptureIndex> scriptureIndexEntries = new List<ScriptureIndex>();
+    private readonly List<ScriptureIndex> scriptureIndexEntries = [];
 
     /// <summary>
     /// The search index entries.
     /// </summary>
-    private readonly List<SearchIndex> searchIndexEntries = new List<SearchIndex>();
+    private readonly List<SearchIndex> searchIndexEntries = [];
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ConfessionFileParser" /> class.
@@ -225,7 +225,7 @@ internal partial class ConfessionFileParser
         };
 
         // Get the child nodes, and add any OL nodes (for catechisms)
-        List<HtmlNode> childNodes = articleNode.ChildNodes.ToList();
+        List<HtmlNode> childNodes = [.. articleNode.ChildNodes];
         for (int i = 0; i < childNodes.Count; i++)
         {
             if (childNodes[i].Name is "ol" or "blockquote")
@@ -347,7 +347,8 @@ internal partial class ConfessionFileParser
                     {
                         foreach (HtmlNode childListNodeItem in childListNode.ChildNodes.Where(n => n.Name == "li"))
                         {
-                            currentEntry.Contents += (" " + ProcessContents(childListNodeItem.GetDirectInnerText())).Trim();
+                            currentEntry.Contents +=
+                                (" " + ProcessContents(childListNodeItem.GetDirectInnerText())).Trim();
                         }
                     }
                 }
@@ -360,11 +361,22 @@ internal partial class ConfessionFileParser
                 // Get the scripture references for the article
                 this.ProcessScriptureReferences(currentEntry.Id, childNode);
             }
+            else if (childNode.Name is "div")
+            {
+                // Get the scripture references for the article
+                this.ProcessScriptureReferences(currentEntry.Id, childNode);
+            }
         }
 
         // Add the last entry
         if (!string.IsNullOrWhiteSpace(currentEntry.Contents))
         {
+            // Ensure that the filename is not empty
+            if (string.IsNullOrWhiteSpace(currentEntry.FileName))
+            {
+                currentEntry.FileName = fileName;
+            }
+
             this.searchIndexEntries.Add(currentEntry);
         }
 

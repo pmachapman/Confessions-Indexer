@@ -33,6 +33,6 @@ An application for generating the full text search database for Conglomo's Creed
 
 # Final Notes
 
- * This app is Copyright 2021-2023 Conglomo Limited. Please see [LICENSE.md](LICENSE.md) for license details.
+ * This app is Copyright 2021-2024 Conglomo Limited. Please see [LICENSE.md](LICENSE.md) for license details.
  * The app is still under development, so if you wish to add features, feel free to make a pull request.
  * I provide no warranty or support for this app or its code. Use at your own risk.

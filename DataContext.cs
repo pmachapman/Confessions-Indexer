@@ -1,6 +1,6 @@
 ﻿// -----------------------------------------------------------------------
 // <copyright file="DataContext.cs" company="Conglomo">
-// Copyright 2021-2023 Conglomo Limited. Please see LICENSE.md for license details.
+// Copyright 2021-2024 Conglomo Limited. Please see LICENSE.md for license details.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -18,17 +18,8 @@ using Microsoft.EntityFrameworkCore.Metadata;
 /// The data context.
 /// </summary>
 /// <seealso cref="Microsoft.EntityFrameworkCore.DbContext" />
-public class DataContext : DbContext
+public class DataContext(DbContextOptions<DataContext> options) : DbContext(options)
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="DataContext"/> class.
-    /// </summary>
-    /// <param name="options">The options.</param>
-    public DataContext(DbContextOptions<DataContext> options)
-      : base(options)
-    {
-    }
-
     /// <summary>
     /// Gets or sets the confessions.
     /// </summary>
@@ -79,9 +70,10 @@ public class DataContext : DbContext
     /// </returns>
     public async Task DropTablesAsync(string? tableName = null, CancellationToken cancellationToken = default)
     {
+#pragma warning disable EF1002
         List<DatabaseTable> databaseTables = string.IsNullOrWhiteSpace(tableName)
-            ? this.DatabaseTables.AsNoTracking().ToList()
-            : new List<DatabaseTable> { new DatabaseTable { TableName = tableName } };
+            ? [.. this.DatabaseTables.AsNoTracking()]
+            : [new DatabaseTable { TableName = tableName }];
 
         foreach (DatabaseTable databaseTable in databaseTables)
         {
@@ -101,6 +93,7 @@ public class DataContext : DbContext
                 await this.Database.ExecuteSqlRawAsync($"DROP TABLE IF EXISTS `{databaseTable.TableName}`", cancellationToken);
             }
         }
+#pragma warning restore EF1002
     }
 
     /// <summary>
@@ -130,9 +123,11 @@ public class DataContext : DbContext
             int returnValue;
             try
             {
+#pragma warning disable EF1002
                 await this.Database.ExecuteSqlRawAsync($"SET IDENTITY_INSERT [{typeof(T).Name}] ON", cancellationToken).ConfigureAwait(true);
                 returnValue = await this.SaveChangesAsync(cancellationToken).ConfigureAwait(true);
                 await this.Database.ExecuteSqlRawAsync($"SET IDENTITY_INSERT [{typeof(T).Name}] ON", cancellationToken).ConfigureAwait(true);
+#pragma warning restore EF1002
             }
             finally
             {

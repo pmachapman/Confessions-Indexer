@@ -18,7 +18,7 @@ public static class Synonyms
     /// All synonyms.
     /// </summary>
     /// <remarks>
-    /// These are case sensitive.
+    /// These are case-sensitive.
     /// </remarks>
     public static readonly ReadOnlyCollection<Synonym> All = new List<Synonym>
         {

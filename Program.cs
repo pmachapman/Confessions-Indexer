@@ -54,8 +54,7 @@ public static class Program
             ConnectionString = "DataSource=confessions;mode=memory;cache=shared",
             Database = Database.SQLite,
             Path = Directory.GetCurrentDirectory(),
-        };
-        configuration.ParseArguments(args);
+        }.ParseArguments(args);
 
         if (!configuration.IsValid())
         {

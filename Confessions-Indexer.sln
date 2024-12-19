@@ -1,7 +1,7 @@
 
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.0.31903.59
+VisualStudioVersion = 17.12.35527.113 d17.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Conglomo.Confessions.Indexer", "Conglomo.Confessions.Indexer.csproj", "{4DD23443-1A31-4702-BBF6-419A4E39EE73}"
 EndProject

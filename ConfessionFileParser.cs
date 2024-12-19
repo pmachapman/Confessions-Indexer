@@ -89,7 +89,7 @@ internal partial class ConfessionFileParser
     /// <returns>The processed contents.</returns>
     private static string ProcessContents(string contents)
     {
-        // Get the contents as text, outside of the tags
+        // Get the contents as text, outside the tags
         contents = OneOrMoreSpacesRegex().Replace(HttpUtility.HtmlDecode(contents), " ").Trim();
 
         // Replace synonyms

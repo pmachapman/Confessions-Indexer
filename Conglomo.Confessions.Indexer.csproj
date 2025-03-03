@@ -7,7 +7,7 @@
     <AssemblyOriginatorKeyFile>Conglomo.Confessions.Indexer.snk</AssemblyOriginatorKeyFile>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <Product>Creeds and Confessions Search Indexer</Product>
-    <Copyright>Copyright 2021-2024 Conglomo Limited. Please see LICENSE.md for license details.</Copyright>
+    <Copyright>Copyright 2021-2025 Conglomo Limited. Please see LICENSE.md for license details.</Copyright>
     <AssemblyName>Index</AssemblyName>
     <Nullable>enable</Nullable>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>

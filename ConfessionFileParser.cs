@@ -256,7 +256,8 @@ internal partial class ConfessionFileParser
                     string articleName = childNode
                         .GetDirectInnerText()
                         .TrimStart('[') // Strip brackets from the Auburn Declaration
-                        .TrimEnd(']');
+                        .TrimEnd(']')
+                        .TrimEnd('.'); // Strip trailing full stop from Luther's Large Catechism
 
                     // Set the current title
                     currentTitle = $"{title}: {articleName}";

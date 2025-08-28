@@ -1,6 +1,6 @@
 ﻿// -----------------------------------------------------------------------
 // <copyright file="Program.cs" company="Conglomo">
-// Copyright 2021-2024 Conglomo Limited. Please see LICENSE.md for license details.
+// Copyright 2021-2025 Conglomo Limited. Please see LICENSE.md for license details.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -176,7 +176,7 @@ public static class Program
     }
 
     /// <summary>
-    /// Shows the about information.
+    /// Shows the information about this program.
     /// </summary>
     /// <param name="copyrightOnly">If set to <c>true</c>, show copyright only. Defaults to <c>false</c>.</param>
     private static void ShowAbout(bool copyrightOnly = false)

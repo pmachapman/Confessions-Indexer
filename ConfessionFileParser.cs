@@ -1,6 +1,6 @@
 ﻿// -----------------------------------------------------------------------
 // <copyright file="ConfessionFileParser.cs" company="Conglomo">
-// Copyright 2021-2024 Conglomo Limited. Please see LICENSE.md for license details.
+// Copyright 2021-2025 Conglomo Limited. Please see LICENSE.md for license details.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -89,7 +89,7 @@ internal partial class ConfessionFileParser
     /// <returns>The processed contents.</returns>
     private static string ProcessContents(string contents)
     {
-        // Get the contents as text, outside of the tags
+        // Get the contents as text, outside the tags
         contents = OneOrMoreSpacesRegex().Replace(HttpUtility.HtmlDecode(contents), " ").Trim();
 
         // Replace synonyms
@@ -265,7 +265,7 @@ internal partial class ConfessionFileParser
                 else if (childNode.Name == "li")
                 {
                     // Catechism Question
-                    string questionNumber = new string(id.Where(char.IsDigit).ToArray());
+                    string questionNumber = new string([.. id.Where(char.IsDigit)]);
                     if (!string.IsNullOrWhiteSpace(questionNumber))
                     {
                         // This is for the Lambeth Articles

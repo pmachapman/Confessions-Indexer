@@ -265,7 +265,7 @@ internal partial class ConfessionFileParser
                 else if (childNode.Name == "li")
                 {
                     // Catechism Question
-                    string questionNumber = new string(id.Where(char.IsDigit).ToArray());
+                    string questionNumber = new string([.. id.Where(char.IsDigit)]);
                     if (!string.IsNullOrWhiteSpace(questionNumber))
                     {
                         // This is for the Lambeth Articles

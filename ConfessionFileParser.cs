@@ -113,6 +113,9 @@ internal partial class ConfessionFileParser
             .Replace(" [; ]", string.Empty, StringComparison.OrdinalIgnoreCase)
             .Replace(" ().", ".", StringComparison.OrdinalIgnoreCase)
             .Replace(" ()", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace(" (; ; ),", ",", StringComparison.OrdinalIgnoreCase)
+            .Replace(" (cf. ).", ".", StringComparison.OrdinalIgnoreCase)
+            .Replace(" (cf. and ).", ".", StringComparison.OrdinalIgnoreCase)
             .Replace("(; ).", ".", StringComparison.OrdinalIgnoreCase)
             .Replace(" , ", ", ", StringComparison.OrdinalIgnoreCase)
             .Replace("?.", ".", StringComparison.OrdinalIgnoreCase)
@@ -268,11 +271,20 @@ internal partial class ConfessionFileParser
                     string questionNumber = new string([.. id.Where(char.IsDigit)]);
                     if (!string.IsNullOrWhiteSpace(questionNumber))
                     {
-                        // This is for the Lambeth Articles
-                        currentTitle = title.Contains("Articles", StringComparison.OrdinalIgnoreCase)
-                                       || title.Contains("Confession", StringComparison.OrdinalIgnoreCase)
-                            ? $"{title}: Article {questionNumber}"
-                            : $"{title}: Question & Answer {questionNumber}";
+                        // Allow a data-title attribute
+                        string liDataTitle = childNode.GetDataAttribute("title")?.Value ?? string.Empty;
+                        if (!string.IsNullOrWhiteSpace(liDataTitle))
+                        {
+                            currentTitle = $"{title}: {liDataTitle}";
+                        }
+                        else
+                        {
+                            // This is for the Lambeth Articles
+                            currentTitle = title.Contains("Articles", StringComparison.OrdinalIgnoreCase)
+                                           || title.Contains("Confession", StringComparison.OrdinalIgnoreCase)
+                                ? $"{title}: Article {questionNumber}"
+                                : $"{title}: Question & Answer {questionNumber}";
+                        }
                     }
 
                     // Remove bold and italic tags, and any basic tables
@@ -286,6 +298,23 @@ internal partial class ConfessionFileParser
 
                     // Get the catechism question and answer
                     currentEntry.Contents += ProcessContents(childNode.GetDirectInnerText());
+
+                    // See if this tag contains a list
+                    if (childNode.Name == "li" && childNode.ChildNodes.Any(n => n.Name is "ul" or "ol"))
+                    {
+                        // Get the contents of the list
+                        foreach (HtmlNode childListNode in childNode.ChildNodes.Where(n => n.Name is "ul" or "ol"))
+                        {
+                            foreach (HtmlNode childListNodeItem in childListNode.ChildNodes.Where(n => n.Name == "li"))
+                            {
+                                currentEntry.Contents +=
+                                    (" " + ProcessContents(childListNodeItem.GetDirectInnerText())).Trim();
+
+                                // Get the scripture references for the node
+                                this.ProcessScriptureReferences(currentEntry.Id, childListNodeItem);
+                            }
+                        }
+                    }
 
                     // Get the scripture references for the question and answer
                     this.ProcessScriptureReferences(currentEntry.Id, childNode);
@@ -337,12 +366,12 @@ internal partial class ConfessionFileParser
                 // Remove bold and italic tags
                 childNode.InnerHtml = childNode.InnerHtml.RemoveFormattingTags();
 
+                // Get the contents of the text
+                currentEntry.Contents += ProcessContents(childNode.GetDirectInnerText());
+
                 // See if this tag contains a list
                 if (childNode.Name == "li" && childNode.ChildNodes.Any(n => n.Name is "ul" or "ol"))
                 {
-                    // Get the contents of the text
-                    currentEntry.Contents += ProcessContents(childNode.GetDirectInnerText());
-
                     // Get the contents of the list
                     foreach (HtmlNode childListNode in childNode.ChildNodes.Where(n => n.Name is "ul" or "ol"))
                     {
@@ -352,11 +381,6 @@ internal partial class ConfessionFileParser
                                 (" " + ProcessContents(childListNodeItem.GetDirectInnerText())).Trim();
                         }
                     }
-                }
-                else
-                {
-                    // Get the contents of the text
-                    currentEntry.Contents += ProcessContents(childNode.GetDirectInnerText());
                 }
 
                 // Get the scripture references for the article

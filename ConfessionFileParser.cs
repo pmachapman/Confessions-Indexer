@@ -282,6 +282,7 @@ internal partial class ConfessionFileParser
                             // This is for the Lambeth Articles
                             currentTitle = title.Contains("Articles", StringComparison.OrdinalIgnoreCase)
                                            || title.Contains("Confession", StringComparison.OrdinalIgnoreCase)
+                                           || title.Contains("Theses", StringComparison.OrdinalIgnoreCase)
                                 ? $"{title}: Article {questionNumber}"
                                 : $"{title}: Question & Answer {questionNumber}";
                         }

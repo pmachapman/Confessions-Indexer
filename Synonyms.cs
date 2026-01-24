@@ -137,6 +137,7 @@ public static class Synonyms
             new Synonym { AlternateWord = "mislikes", PreferredWord = "dislikes" },
             new Synonym { AlternateWord = "Nicæa", PreferredWord = "Nicea" },
             new Synonym { AlternateWord = "Nicaea", PreferredWord = "Nicea" },
+            new Synonym { AlternateWord = "Nicaean", PreferredWord = "Nicene" },
             new Synonym { AlternateWord = "neighbor", PreferredWord = "neighbour" },
             new Synonym { AlternateWord = "neighbors", PreferredWord = "neighbours" },
             new Synonym { AlternateWord = "nourisheth", PreferredWord = "nourishes" },

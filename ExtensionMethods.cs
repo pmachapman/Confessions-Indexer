@@ -1,6 +1,6 @@
 ﻿// -----------------------------------------------------------------------
 // <copyright file="ExtensionMethods.cs" company="Conglomo">
-// Copyright 2021-2025 Conglomo Limited. Please see LICENSE.md for license details.
+// Copyright 2021-2026 Conglomo Limited. Please see LICENSE.md for license details.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -32,11 +32,9 @@ public static class ExtensionMethods
             case Database.MSSQL:
                 optionsBuilder.UseSqlServer(configuration.ConnectionString);
                 break;
-            case Database.MySQL:
-                optionsBuilder.UseMySql(configuration.ConnectionString, MySqlServerVersion.LatestSupportedServerVersion);
-                break;
             case Database.MariaDB:
-                optionsBuilder.UseMySql(configuration.ConnectionString, MariaDbServerVersion.LatestSupportedServerVersion);
+            case Database.MySQL:
+                optionsBuilder.UseMySQL(configuration.ConnectionString);
                 break;
             case Database.None:
             case Database.SQLite:

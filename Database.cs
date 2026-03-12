@@ -1,6 +1,6 @@
 ﻿// -----------------------------------------------------------------------
 // <copyright file="Database.cs" company="Conglomo">
-// Copyright 2021-2025 Conglomo Limited. Please see LICENSE.md for license details.
+// Copyright 2021-2026 Conglomo Limited. Please see LICENSE.md for license details.
 // </copyright>
 // -----------------------------------------------------------------------
 

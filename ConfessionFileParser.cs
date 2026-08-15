@@ -108,6 +108,7 @@ internal partial class ConfessionFileParser
 
         // Fix any weirdness
         contents = contents
+            .Replace("; ;", string.Empty, StringComparison.OrdinalIgnoreCase)
             .Replace(" - .", string.Empty, StringComparison.OrdinalIgnoreCase)
             .Replace(" []", string.Empty, StringComparison.OrdinalIgnoreCase)
             .Replace(" [; ]", string.Empty, StringComparison.OrdinalIgnoreCase)
@@ -279,12 +280,36 @@ internal partial class ConfessionFileParser
                         }
                         else
                         {
-                            // This is for the Lambeth Articles
+                            // This is for the Lambeth Articles (and others)
                             currentTitle = title.Contains("Articles", StringComparison.OrdinalIgnoreCase)
                                            || title.Contains("Confession", StringComparison.OrdinalIgnoreCase)
+                                           || title.Contains("Declaration", StringComparison.OrdinalIgnoreCase)
                                            || title.Contains("Theses", StringComparison.OrdinalIgnoreCase)
                                 ? $"{title}: Article {questionNumber}"
                                 : $"{title}: Question & Answer {questionNumber}";
+                        }
+
+                        // If the entry before this was a heading without a body, add the heading
+                        if (currentEntry.FileName != currentFileName)
+                        {
+                            // If this is a heading with no content, set the contents to the heading
+                            if (string.IsNullOrWhiteSpace(currentEntry.Contents) && currentEntry.FileName.Contains('#', StringComparison.OrdinalIgnoreCase))
+                            {
+                                currentEntry.Contents = ProcessContents(string.Join(' ', currentEntry.Title.Split(':', StringSplitOptions.TrimEntries).Skip(1)));
+                            }
+
+                            // Add to the index if there is content
+                            if (!string.IsNullOrWhiteSpace(currentEntry.Contents))
+                            {
+                                this.searchIndexEntries.Add(currentEntry);
+                            }
+
+                            currentEntry = new SearchIndex
+                            {
+                                FileName = currentFileName,
+                                Id = ++this.LastId,
+                                Title = HttpUtility.HtmlDecode(currentTitle),
+                            };
                         }
                     }
 
@@ -304,6 +329,7 @@ internal partial class ConfessionFileParser
                     if (childNode.Name == "li" && childNode.ChildNodes.Any(n => n.Name is "ul" or "ol"))
                     {
                         // Get the contents of the list
+                        // NOTE: For the Berlin Declaration, this will fold Articles 1.1-1.5 into Article 1
                         foreach (HtmlNode childListNode in childNode.ChildNodes.Where(n => n.Name is "ul" or "ol"))
                         {
                             foreach (HtmlNode childListNodeItem in childListNode.ChildNodes.Where(n => n.Name == "li"))
@@ -337,6 +363,13 @@ internal partial class ConfessionFileParser
 
                 if (currentEntry.FileName != currentFileName)
                 {
+                    // If this is a heading with no content, set the contents to the heading
+                    if (string.IsNullOrWhiteSpace(currentEntry.Contents) && currentEntry.FileName.Contains('#', StringComparison.OrdinalIgnoreCase))
+                    {
+                        currentEntry.Contents = ProcessContents(string.Join(' ', currentEntry.Title.Split(':', StringSplitOptions.TrimEntries).Skip(1)));
+                    }
+
+                    // Add to the index if there is content
                     if (!string.IsNullOrWhiteSpace(currentEntry.Contents))
                     {
                         this.searchIndexEntries.Add(currentEntry);

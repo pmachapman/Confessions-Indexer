@@ -22,8 +22,12 @@ internal static class Log
     static Log()
     {
         const string testAssemblyName = "Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter";
-        IsInUnitTest = AppDomain.CurrentDomain.GetAssemblies()
-            .Any(a => a.FullName?.StartsWith(testAssemblyName, StringComparison.OrdinalIgnoreCase) ?? false);
+        IsInUnitTest = AppDomain
+            .CurrentDomain.GetAssemblies()
+            .Any(a =>
+                a.FullName?.StartsWith(testAssemblyName, StringComparison.OrdinalIgnoreCase)
+                ?? false
+            );
     }
 
     /// <summary>

@@ -16,6 +16,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 /// <summary>
 /// The data context.
 /// </summary>
+/// <param name="options">The data context options.</param>
 /// <seealso cref="Microsoft.EntityFrameworkCore.DbContext" />
 public class DataContext(DbContextOptions<DataContext> options) : DbContext(options)
 {
@@ -67,7 +68,10 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
     /// <returns>
     /// The task.
     /// </returns>
-    public async Task DropTablesAsync(string? tableName = null, CancellationToken cancellationToken = default)
+    public async Task DropTablesAsync(
+        string? tableName = null,
+        CancellationToken cancellationToken = default
+    )
     {
 #pragma warning disable EF1002
         List<DatabaseTable> databaseTables = string.IsNullOrWhiteSpace(tableName)
@@ -78,18 +82,24 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
         {
             if (this.Database.IsSqlServer())
             {
-                databaseTable.TableName = databaseTable.TableName
-                    .Replace("[", "\\[", StringComparison.OrdinalIgnoreCase)
+                databaseTable.TableName = databaseTable
+                    .TableName.Replace("[", "\\[", StringComparison.OrdinalIgnoreCase)
                     .Replace("]", "\\]", StringComparison.OrdinalIgnoreCase);
-                await this.Database.ExecuteSqlRawAsync($"DROP TABLE IF EXISTS [{databaseTable.TableName}]", cancellationToken);
+                await this.Database.ExecuteSqlRawAsync(
+                    $"DROP TABLE IF EXISTS [{databaseTable.TableName}]",
+                    cancellationToken
+                );
             }
             else if (!databaseTable.TableName.Contains('_', StringComparison.OrdinalIgnoreCase))
             {
                 // SQLite created tables contain underscores
-                databaseTable.TableName = databaseTable.TableName
-                    .Replace("`", "\\`", StringComparison.OrdinalIgnoreCase)
+                databaseTable.TableName = databaseTable
+                    .TableName.Replace("`", "\\`", StringComparison.OrdinalIgnoreCase)
                     .Replace("`", "\\`", StringComparison.OrdinalIgnoreCase);
-                await this.Database.ExecuteSqlRawAsync($"DROP TABLE IF EXISTS `{databaseTable.TableName}`", cancellationToken);
+                await this.Database.ExecuteSqlRawAsync(
+                    $"DROP TABLE IF EXISTS `{databaseTable.TableName}`",
+                    cancellationToken
+                );
             }
         }
 #pragma warning restore EF1002
@@ -112,7 +122,9 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
     /// 'await' to ensure that any asynchronous operations have completed before calling
     /// another method on this context.
     /// </remarks>
-    public async Task<int> SaveChangesWithIdentityInsertAsync<T>(CancellationToken cancellationToken = default)
+    public async Task<int> SaveChangesWithIdentityInsertAsync<T>(
+        CancellationToken cancellationToken = default
+    )
         where T : IIdentifiable
     {
         if (this.Database.IsSqlServer())
@@ -123,9 +135,19 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
             try
             {
 #pragma warning disable EF1002
-                await this.Database.ExecuteSqlRawAsync($"SET IDENTITY_INSERT [{typeof(T).Name}] ON", cancellationToken).ConfigureAwait(true);
+                await this
+                    .Database.ExecuteSqlRawAsync(
+                        $"SET IDENTITY_INSERT [{typeof(T).Name}] ON",
+                        cancellationToken
+                    )
+                    .ConfigureAwait(true);
                 returnValue = await this.SaveChangesAsync(cancellationToken).ConfigureAwait(true);
-                await this.Database.ExecuteSqlRawAsync($"SET IDENTITY_INSERT [{typeof(T).Name}] ON", cancellationToken).ConfigureAwait(true);
+                await this
+                    .Database.ExecuteSqlRawAsync(
+                        $"SET IDENTITY_INSERT [{typeof(T).Name}] ON",
+                        cancellationToken
+                    )
+                    .ConfigureAwait(true);
 #pragma warning restore EF1002
             }
             finally
@@ -148,34 +170,33 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
             ? "SELECT TABLE_NAME AS TABLENAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME NOT LIKE '%Migration%' AND TABLE_NAME <> 'sysdiagrams' ORDER BY TABLE_NAME"
             : "SELECT name AS TABLENAME FROM sqlite_master WHERE type = 'table' ORDER BY name;";
 
-        modelBuilder.Entity<DatabaseTable>()
-            .ToSqlQuery(query)
-            .HasNoKey();
-        modelBuilder.Entity<ScriptureIndex>()
-            .HasKey(s => s.Id);
-        modelBuilder.Entity<ScriptureIndex>()
-            .Property(s => s.Book).HasMaxLength(45);
-        modelBuilder.Entity<ScriptureIndex>()
-            .HasIndex(s => new { s.Book, s.ChapterNumber });
-        modelBuilder.Entity<ScriptureIndex>()
-            .HasIndex(s => new { s.SearchIndexId, s.Book, s.ChapterNumber })
+        modelBuilder.Entity<DatabaseTable>().ToSqlQuery(query).HasNoKey();
+        modelBuilder.Entity<ScriptureIndex>().HasKey(s => s.Id);
+        modelBuilder.Entity<ScriptureIndex>().Property(s => s.Book).HasMaxLength(45);
+        modelBuilder.Entity<ScriptureIndex>().HasIndex(s => new { s.Book, s.ChapterNumber });
+        modelBuilder
+            .Entity<ScriptureIndex>()
+            .HasIndex(s => new
+            {
+                s.SearchIndexId,
+                s.Book,
+                s.ChapterNumber,
+            })
             .IsUnique();
-        modelBuilder.Entity<ScriptureIndex>()
-            .HasIndex(s => s.SearchIndexId);
-        modelBuilder.Entity<ScriptureIndex>()
+        modelBuilder.Entity<ScriptureIndex>().HasIndex(s => s.SearchIndexId);
+        modelBuilder
+            .Entity<ScriptureIndex>()
             .HasOne(s => s.SearchIndex)
             .WithMany(i => i.ScriptureIndex)
             .HasForeignKey(s => s.SearchIndexId);
-        modelBuilder.Entity<SearchIndex>()
-            .HasKey(s => s.Id);
-        modelBuilder.Entity<SearchIndex>()
-            .HasIndex(s => s.ConfessionId);
-        modelBuilder.Entity<SearchIndex>()
+        modelBuilder.Entity<SearchIndex>().HasKey(s => s.Id);
+        modelBuilder.Entity<SearchIndex>().HasIndex(s => s.ConfessionId);
+        modelBuilder
+            .Entity<SearchIndex>()
             .HasOne(s => s.Confession)
             .WithMany(c => c.SearchIndex)
             .HasForeignKey(s => s.ConfessionId);
-        modelBuilder.Entity<Synonym>()
-            .HasKey(s => s.Id);
+        modelBuilder.Entity<Synonym>().HasKey(s => s.Id);
 
         // Use singular table names
         foreach (IMutableEntityType entityType in modelBuilder.Model.GetEntityTypes())

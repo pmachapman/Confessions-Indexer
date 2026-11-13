@@ -204,3 +204,9 @@ dotnet_style_qualification_for_event = false:silent
 dotnet_style_qualification_for_method = true:suggestion
 dotnet_style_qualification_for_property = true:suggestion
 dotnet_style_qualification_for_field = true:silent
+
+# StyleCop rules
+
+dotnet_diagnostic.SA1009.severity = none # Closing parenthesis should be spaced correctly
+dotnet_diagnostic.SA1111.severity = none # Closing parenthesis should be on line of last parameter
+dotnet_diagnostic.SA1143.severity = none # Conditional expressions must be formatted consistently

@@ -64,22 +64,32 @@ public static class Program
 
         // Get the file names
         string[] fileNames = configuration.Path.IsFile()
-            ? [configuration.Path] :
-            Directory.GetFiles(configuration.Path, "*.html");
+            ? [configuration.Path]
+            : Directory.GetFiles(configuration.Path, "*.html");
 
         // If we are using SQLite in-memory, we need to keep the connection open
         SqliteConnection? keepAliveConnection = null;
         try
         {
-            if (configuration.ConnectionString.Contains("mode=memory", StringComparison.OrdinalIgnoreCase)
-                || configuration.ConnectionString.Contains(":memory:", StringComparison.OrdinalIgnoreCase))
+            if (
+                configuration.ConnectionString.Contains(
+                    "mode=memory",
+                    StringComparison.OrdinalIgnoreCase
+                )
+                || configuration.ConnectionString.Contains(
+                    ":memory:",
+                    StringComparison.OrdinalIgnoreCase
+                )
+            )
             {
                 keepAliveConnection = new SqliteConnection(configuration.ConnectionString);
                 keepAliveConnection.Open();
             }
 
             // Connect to the database
-            await using DataContext context = new DataContext(configuration.DbContextOptions<DataContext>());
+            await using DataContext context = new DataContext(
+                configuration.DbContextOptions<DataContext>()
+            );
 
             // Drop all existing tables, to work around foreign keys
             await context.DropTablesAsync("Synonym");
@@ -89,8 +99,8 @@ public static class Program
             await context.DropTablesAsync("SearchIndexFts");
 
             // Create the tables
-            RelationalDatabaseCreator databaseCreator = (RelationalDatabaseCreator)context.Database.GetService<IDatabaseCreator>();
-            await databaseCreator.CreateTablesAsync();
+            RelationalDatabaseCreator? databaseCreator = context.Database.GetService<IDatabaseCreator>() as RelationalDatabaseCreator;
+            await databaseCreator!.CreateTablesAsync();
 
             // Drop the DatabaseName table
             await context.DropTablesAsync(nameof(DatabaseTable));
@@ -156,9 +166,15 @@ public static class Program
             // Build the full text search index
             if (configuration.Database == Database.SQLite)
             {
-                await context.Database.ExecuteSqlRawAsync("CREATE VIRTUAL TABLE SearchIndexFts USING fts4(content=`SearchIndex`, Contents, Title);");
-                await context.Database.ExecuteSqlRawAsync("INSERT INTO SearchIndexFts(docid, Contents, Title) SELECT Id, Contents, Title FROM SearchIndex;");
-                await context.Database.ExecuteSqlRawAsync("INSERT INTO SearchIndexFts(SearchIndexFts) VALUES ('optimize');");
+                await context.Database.ExecuteSqlRawAsync(
+                    "CREATE VIRTUAL TABLE SearchIndexFts USING fts4(content=`SearchIndex`, Contents, Title);"
+                );
+                await context.Database.ExecuteSqlRawAsync(
+                    "INSERT INTO SearchIndexFts(docid, Contents, Title) SELECT Id, Contents, Title FROM SearchIndex;"
+                );
+                await context.Database.ExecuteSqlRawAsync(
+                    "INSERT INTO SearchIndexFts(SearchIndexFts) VALUES ('optimize');"
+                );
                 await context.Database.ExecuteSqlRawAsync("VACUUM;");
             }
 

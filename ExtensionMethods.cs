@@ -55,8 +55,11 @@ public static class ExtensionMethods
     /// <returns>
     ///   <c>true</c> if the value parameter matches the end of this string; otherwise, <c>false</c>.
     /// </returns>
-    public static bool EndsWith(this string instance, IEnumerable<string> values, StringComparison comparisonType)
-        => values.Any(value => instance.EndsWith(value, comparisonType));
+    public static bool EndsWith(
+        this string instance,
+        IEnumerable<string> values,
+        StringComparison comparisonType
+    ) => values.Any(value => instance.EndsWith(value, comparisonType));
 
     /// <summary>
     /// Returns <c>true</c> if the path is a confession file.
@@ -65,8 +68,8 @@ public static class ExtensionMethods
     /// <returns>
     ///   <c>true</c> if the specified path is a confession file; otherwise, <c>false</c>.
     /// </returns>
-    public static bool IsFile(this string path)
-        => path.EndsWith(".html", StringComparison.OrdinalIgnoreCase);
+    public static bool IsFile(this string path) =>
+        path.EndsWith(".html", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// Returns true if the indexer configuration is valid.
@@ -76,11 +79,15 @@ public static class ExtensionMethods
     ///   <c>true</c> if the specified indexer configuration is valid; otherwise, <c>false</c>.
     /// </returns>
     /// <remarks>Checks for empty values or an invalid path.</remarks>
-    public static bool IsValid(this IndexerConfiguration configuration)
-        => configuration.Database != Database.None
-            && !string.IsNullOrWhiteSpace(configuration.ConnectionString)
-            && !string.IsNullOrWhiteSpace(configuration.Path)
-            && (configuration.Path.IsFile() ? File.Exists(configuration.Path) : Directory.Exists(configuration.Path));
+    public static bool IsValid(this IndexerConfiguration configuration) =>
+        configuration.Database != Database.None
+        && !string.IsNullOrWhiteSpace(configuration.ConnectionString)
+        && !string.IsNullOrWhiteSpace(configuration.Path)
+        && (
+            configuration.Path.IsFile()
+                ? File.Exists(configuration.Path)
+                : Directory.Exists(configuration.Path)
+        );
 
     /// <summary>
     /// Parses the command line arguments.
@@ -90,7 +97,10 @@ public static class ExtensionMethods
     /// <returns>
     /// The indexer configuration completed with the command line arguments.
     /// </returns>
-    public static IndexerConfiguration ParseArguments(this IndexerConfiguration configuration, string[] args)
+    public static IndexerConfiguration ParseArguments(
+        this IndexerConfiguration configuration,
+        string[] args
+    )
     {
         foreach (string arg in args)
         {
@@ -130,7 +140,10 @@ public static class ExtensionMethods
             catch (Exception ex)
             {
                 // Ignore errors
-                if (ex is not (ArgumentException or ArgumentNullException or InvalidOperationException))
+                if (
+                    ex
+                    is not (ArgumentException or ArgumentNullException or InvalidOperationException)
+                )
                 {
                     throw;
                 }
@@ -147,20 +160,21 @@ public static class ExtensionMethods
     /// <returns>
     /// The string instance with formatting tags removed.
     /// </returns>
-    public static string RemoveFormattingTags(this string instance) => instance
-        .Replace("<em>", string.Empty, StringComparison.OrdinalIgnoreCase)
-        .Replace("</em>", string.Empty, StringComparison.OrdinalIgnoreCase)
-        .Replace("<strong>", string.Empty, StringComparison.OrdinalIgnoreCase)
-        .Replace("</strong>", string.Empty, StringComparison.OrdinalIgnoreCase)
-        .Replace("<table>", string.Empty, StringComparison.OrdinalIgnoreCase)
-        .Replace("</table>", string.Empty, StringComparison.OrdinalIgnoreCase)
-        .Replace("<thead>", string.Empty, StringComparison.OrdinalIgnoreCase)
-        .Replace("</thead>", string.Empty, StringComparison.OrdinalIgnoreCase)
-        .Replace("<tbody>", string.Empty, StringComparison.OrdinalIgnoreCase)
-        .Replace("</tbody>", string.Empty, StringComparison.OrdinalIgnoreCase)
-        .Replace("<tr>", string.Empty, StringComparison.OrdinalIgnoreCase)
-        .Replace("</tr>", string.Empty, StringComparison.OrdinalIgnoreCase)
-        .Replace("<td>", string.Empty, StringComparison.OrdinalIgnoreCase)
-        .Replace("</td>", string.Empty, StringComparison.OrdinalIgnoreCase)
-        .Replace("<td colspan=\"3\">", string.Empty, StringComparison.OrdinalIgnoreCase);
+    public static string RemoveFormattingTags(this string instance) =>
+        instance
+            .Replace("<em>", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("</em>", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("<strong>", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("</strong>", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("<table>", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("</table>", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("<thead>", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("</thead>", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("<tbody>", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("</tbody>", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("<tr>", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("</tr>", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("<td>", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("</td>", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("<td colspan=\"3\">", string.Empty, StringComparison.OrdinalIgnoreCase);
 }

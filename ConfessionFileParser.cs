@@ -72,7 +72,8 @@ internal partial class ConfessionFileParser
     /// <value>
     /// The scripture index entries.
     /// </value>
-    public ReadOnlyCollection<ScriptureIndex> ScriptureIndex => this.scriptureIndexEntries.AsReadOnly();
+    public ReadOnlyCollection<ScriptureIndex> ScriptureIndex =>
+        this.scriptureIndexEntries.AsReadOnly();
 
     /// <summary>
     /// Gets the search index entries.
@@ -149,13 +150,18 @@ internal partial class ConfessionFileParser
                 // Get all references from the references div
                 this.ProcessScriptureReferences(id, childNode);
             }
-            else if (childNode.Name == "a"
+            else if (
+                childNode.Name == "a"
                 && !string.IsNullOrWhiteSpace(childNode.Attributes["href"]?.Value)
-                && childNode.Attributes["href"].Value.StartsWith("https://goto.bible/", StringComparison.OrdinalIgnoreCase))
+                && childNode.Attributes["href"]!.Value!.StartsWith(
+                    "https://goto.bible/",
+                    StringComparison.OrdinalIgnoreCase
+                )
+            )
             {
                 ScriptureIndex scriptureIndex = new ScriptureIndex
                 {
-                    Address = childNode.Attributes["href"].Value,
+                    Address = childNode.Attributes["href"]!.Value!,
                     Id = ++this.LastId,
                     Reference = childNode.InnerText,
                     SearchIndexId = id,
@@ -165,9 +171,13 @@ internal partial class ConfessionFileParser
                 scriptureIndex.Book = chapterReference.Book;
 
                 // Check the unique key
-                if (!this.scriptureIndexEntries.Any(s => s.SearchIndexId == scriptureIndex.SearchIndexId
-                    && s.Book == scriptureIndex.Book
-                    && s.ChapterNumber == scriptureIndex.ChapterNumber))
+                if (
+                    !this.scriptureIndexEntries.Any(s =>
+                        s.SearchIndexId == scriptureIndex.SearchIndexId
+                        && s.Book == scriptureIndex.Book
+                        && s.ChapterNumber == scriptureIndex.ChapterNumber
+                    )
+                )
                 {
                     this.scriptureIndexEntries.Add(scriptureIndex);
                 }
@@ -219,12 +229,12 @@ internal partial class ConfessionFileParser
         // Create the confession object
         this.Confession = new Confession
         {
-            Country = articleNode.GetDataAttribute("country").Value,
+            Country = articleNode.GetDataAttribute("country").Value!,
             FileName = fileName,
             Id = ++this.LastId,
-            Quiz = articleNode.GetDataAttribute("quiz")?.Value.ToLowerInvariant() == "true",
+            Quiz = articleNode.GetDataAttribute("quiz")?.Value?.ToLowerInvariant() == "true",
             Title = HttpUtility.HtmlDecode(title),
-            Tradition = articleNode.GetDataAttribute("tradition").Value,
+            Tradition = articleNode.GetDataAttribute("tradition").Value!,
             Year = Convert.ToInt32(articleNode.GetDataAttribute("year").Value),
         };
 
@@ -250,9 +260,12 @@ internal partial class ConfessionFileParser
         };
         foreach (HtmlNode childNode in childNodes)
         {
-            if (childNode.HasAttributes && !string.IsNullOrWhiteSpace(childNode.Attributes["id"]?.Value))
+            if (
+                childNode.HasAttributes
+                && !string.IsNullOrWhiteSpace(childNode.Attributes["id"]?.Value)
+            )
             {
-                string id = childNode.Attributes["id"].Value;
+                string id = childNode.Attributes["id"]!.Value!;
                 string currentFileName = $"{fileName}#{id}";
                 if (childNode.Name is "h3" or "h4" or "h5")
                 {
@@ -273,7 +286,8 @@ internal partial class ConfessionFileParser
                     if (!string.IsNullOrWhiteSpace(questionNumber))
                     {
                         // Allow a data-title attribute
-                        string liDataTitle = childNode.GetDataAttribute("title")?.Value ?? string.Empty;
+                        string liDataTitle = childNode.GetDataAttribute("title")?.Value
+                            ?? string.Empty;
                         if (!string.IsNullOrWhiteSpace(liDataTitle))
                         {
                             currentTitle = $"{title}: {liDataTitle}";
@@ -281,21 +295,35 @@ internal partial class ConfessionFileParser
                         else
                         {
                             // This is for the Lambeth Articles (and others)
-                            currentTitle = title.Contains("Articles", StringComparison.OrdinalIgnoreCase)
-                                           || title.Contains("Confession", StringComparison.OrdinalIgnoreCase)
-                                           || title.Contains("Declaration", StringComparison.OrdinalIgnoreCase)
-                                           || title.Contains("Theses", StringComparison.OrdinalIgnoreCase)
-                                ? $"{title}: Article {questionNumber}"
-                                : $"{title}: Question & Answer {questionNumber}";
+                            currentTitle =
+                                title.Contains("Articles", StringComparison.OrdinalIgnoreCase)
+                                || title.Contains("Confession", StringComparison.OrdinalIgnoreCase)
+                                || title.Contains("Declaration", StringComparison.OrdinalIgnoreCase)
+                                || title.Contains("Theses", StringComparison.OrdinalIgnoreCase)
+                                    ? $"{title}: Article {questionNumber}"
+                                    : $"{title}: Question & Answer {questionNumber}";
                         }
 
                         // If the entry before this was a heading without a body, add the heading
                         if (currentEntry.FileName != currentFileName)
                         {
                             // If this is a heading with no content, set the contents to the heading
-                            if (string.IsNullOrWhiteSpace(currentEntry.Contents) && currentEntry.FileName.Contains('#', StringComparison.OrdinalIgnoreCase))
+                            if (
+                                string.IsNullOrWhiteSpace(currentEntry.Contents)
+                                && currentEntry.FileName.Contains(
+                                    '#',
+                                    StringComparison.OrdinalIgnoreCase
+                                )
+                            )
                             {
-                                currentEntry.Contents = ProcessContents(string.Join(' ', currentEntry.Title.Split(':', StringSplitOptions.TrimEntries).Skip(1)));
+                                currentEntry.Contents = ProcessContents(
+                                    string.Join(
+                                        ' ',
+                                        currentEntry
+                                            .Title.Split(':', StringSplitOptions.TrimEntries)
+                                            .Skip(1)
+                                    )
+                                );
                             }
 
                             // Add to the index if there is content
@@ -326,16 +354,28 @@ internal partial class ConfessionFileParser
                     currentEntry.Contents += ProcessContents(childNode.GetDirectInnerText());
 
                     // See if this tag contains a list
-                    if (childNode.Name == "li" && childNode.ChildNodes.Any(n => n.Name is "ul" or "ol"))
+                    if (
+                        childNode.Name == "li"
+                        && childNode.ChildNodes.Any(n => n.Name is "ul" or "ol")
+                    )
                     {
                         // Get the contents of the list
                         // NOTE: For the Berlin Declaration, this will fold Articles 1.1-1.5 into Article 1
-                        foreach (HtmlNode childListNode in childNode.ChildNodes.Where(n => n.Name is "ul" or "ol"))
+                        foreach (
+                            HtmlNode childListNode in childNode.ChildNodes.Where(n =>
+                                n.Name is "ul" or "ol"
+                            )
+                        )
                         {
-                            foreach (HtmlNode childListNodeItem in childListNode.ChildNodes.Where(n => n.Name == "li"))
+                            foreach (
+                                HtmlNode childListNodeItem in childListNode.ChildNodes.Where(n =>
+                                    n.Name == "li"
+                                )
+                            )
                             {
-                                currentEntry.Contents +=
-                                    (" " + ProcessContents(childListNodeItem.GetDirectInnerText())).Trim();
+                                currentEntry.Contents += (
+                                    " " + ProcessContents(childListNodeItem.GetDirectInnerText())
+                                ).Trim();
 
                                 // Get the scripture references for the node
                                 this.ProcessScriptureReferences(currentEntry.Id, childListNodeItem);
@@ -364,9 +404,19 @@ internal partial class ConfessionFileParser
                 if (currentEntry.FileName != currentFileName)
                 {
                     // If this is a heading with no content, set the contents to the heading
-                    if (string.IsNullOrWhiteSpace(currentEntry.Contents) && currentEntry.FileName.Contains('#', StringComparison.OrdinalIgnoreCase))
+                    if (
+                        string.IsNullOrWhiteSpace(currentEntry.Contents)
+                        && currentEntry.FileName.Contains('#', StringComparison.OrdinalIgnoreCase)
+                    )
                     {
-                        currentEntry.Contents = ProcessContents(string.Join(' ', currentEntry.Title.Split(':', StringSplitOptions.TrimEntries).Skip(1)));
+                        currentEntry.Contents = ProcessContents(
+                            string.Join(
+                                ' ',
+                                currentEntry
+                                    .Title.Split(':', StringSplitOptions.TrimEntries)
+                                    .Skip(1)
+                            )
+                        );
                     }
 
                     // Add to the index if there is content
@@ -386,7 +436,11 @@ internal partial class ConfessionFileParser
             else if (childNode.Name is "p" or "li" or "h4" or "h5")
             {
                 // Check for noindex
-                if (childNode.Attributes["class"]?.Value?.Contains("noindex", StringComparison.OrdinalIgnoreCase) ?? false)
+                if (
+                    childNode
+                        .Attributes["class"]
+                        ?.Value?.Contains("noindex", StringComparison.OrdinalIgnoreCase) ?? false
+                )
                 {
                     continue;
                 }
@@ -407,12 +461,21 @@ internal partial class ConfessionFileParser
                 if (childNode.Name == "li" && childNode.ChildNodes.Any(n => n.Name is "ul" or "ol"))
                 {
                     // Get the contents of the list
-                    foreach (HtmlNode childListNode in childNode.ChildNodes.Where(n => n.Name is "ul" or "ol"))
+                    foreach (
+                        HtmlNode childListNode in childNode.ChildNodes.Where(n =>
+                            n.Name is "ul" or "ol"
+                        )
+                    )
                     {
-                        foreach (HtmlNode childListNodeItem in childListNode.ChildNodes.Where(n => n.Name == "li"))
+                        foreach (
+                            HtmlNode childListNodeItem in childListNode.ChildNodes.Where(n =>
+                                n.Name == "li"
+                            )
+                        )
                         {
-                            currentEntry.Contents +=
-                                (" " + ProcessContents(childListNodeItem.GetDirectInnerText())).Trim();
+                            currentEntry.Contents += (
+                                " " + ProcessContents(childListNodeItem.GetDirectInnerText())
+                            ).Trim();
                         }
                     }
                 }

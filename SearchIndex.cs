@@ -54,7 +54,8 @@ public record SearchIndex : IIdentifiable
     /// <value>
     /// The scripture indices.
     /// </value>
-    public virtual ICollection<ScriptureIndex> ScriptureIndex { get; } = new HashSet<ScriptureIndex>();
+    public virtual ICollection<ScriptureIndex> ScriptureIndex { get; } =
+        new HashSet<ScriptureIndex>();
 
     /// <summary>
     /// Gets or sets the title.
